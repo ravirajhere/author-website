@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>404 — Page not found · Ravi Raj Singh</title>
+    <meta name="description" content="This page went on a journey. Let's find our way back." />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#F7F4EE" />
+
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/404.css" />
+</head>
+<body class="page-404">
+
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <main id="main" class="error-main" tabindex="-1">
+
+        <div class="error-content">
+
+            <p class="error-eyebrow">
+                <span class="error-dot" aria-hidden="true"></span>
+                Error 404 · Page not found
+            </p>
+
+            <h1 class="error-code" aria-label="404">
+                <span class="err-digit">4</span><span class="err-digit-zero">0</span><span class="err-digit">4</span>
+            </h1>
+
+            <p class="error-title">
+                <em>This page went on a journey too.</em>
+            </p>
+
+            <p class="error-lede">
+                The URL you were looking for isn't here. Maybe it never was, maybe it moved, or maybe it was a typo. No worries — shall we head back?
+            </p>
+
+            <div class="error-actions">
+                <a href="author.html" class="btn btn-primary btn-lg">
+                    ← Back to author page
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                </a>
+                <a href="book.html" class="btn btn-quiet btn-lg">Read the book</a>
+            </div>
+
+            <div class="error-links">
+                <h2 class="error-links-title">Popular pages</h2>
+                <ul class="error-links-list">
+                    <li><a href="author.html"><span>01</span>Author home</a></li>
+                    <li><a href="book.html"><span>02</span>Read the book</a></li>
+                    <li><a href="author.html#about"><span>03</span>About</a></li>
+                    <li><a href="author.html#newsletter"><span>04</span>Newsletter</a></li>
+                    <li><a href="author.html#contact"><span>05</span>Contact</a></li>
+                    <li><a href="https://ravirajhere.vercel.app"><span>06</span>Portfolio</a></li>
+                </ul>
+            </div>
+
+            <p class="error-note">
+                <span class="err-mono">404</span> · Page not found · <a href="author.html">Home</a>
+            </p>
+
+        </div>
+
+    </main>
+
+    <footer class="error-footer">
+        <p>
+            <span class="err-mono">© <span id="year">2026</span> Ravi Raj Singh · Patna, India</span>
+        </p>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const yearEl = document.getElementById('year');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+        })();
+    </script>
+
+</body>
+</html>
