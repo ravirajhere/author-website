@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Print — A Boy Who Never Thought</title>
+    <meta name="robots" content="noindex, nofollow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="css/print.css" />
+</head>
+<body>
+
+    <div id="loading" class="loading">
+        <p>Loading book…</p>
+    </div>
+
+    <main id="book-root" class="book-root" hidden>
+
+        <section class="page page-cover" id="page-cover">
+            <img src="assets/images/bookcover.jpg" alt="A Boy Who Never Thought" />
+        </section>
+
+        <section class="page page-half-title" id="page-half-title">
+            <h1 class="half-title">A Boy Who Never Thought</h1>
+        </section>
+
+        <section class="page page-frontispiece" id="page-frontispiece">
+            <div class="frontispiece-frame">
+                <img src="assets/images/casual.jpg" alt="Ravi Raj Singh" />
+            </div>
+            <p class="frontispiece-caption">Ravi Raj Singh</p>
+            <p class="frontispiece-caption">Patna, India · 2026</p>
+        </section>
+
+        <section class="page page-title" id="page-title">
+            <div class="title-rule"></div>
+            <p class="title-byline">A Book by</p>
+            <h1 class="title-main">A Boy Who Never Thought</h1>
+            <p class="title-subtitle">Safar Se Safar Tak</p>
+            <p class="title-subtitle-hi">गुंजते सन्नाटे</p>
+            <div class="title-rule"></div>
+            <p class="title-author">Ravi Raj Singh</p>
+            <p class="title-place">Patna, India · 2026</p>
+        </section>
+
+        <section class="page page-copyright" id="page-copyright">
+            <h2 class="page-label">Copyright</h2>
+            <p>© 2024 Ravi Raj Singh. All rights reserved.</p>
+            <p>No part of this book may be reproduced or transmitted in any form without prior written permission from the author.</p>
+            <p>This book is not for sale. For personal reading only.</p>
+            <p>First written in 2024. Ongoing.</p>
+            <div class="copyright-rule"></div>
+            <p class="copyright-contact">
+                Ravi Raj Singh<br>
+                Patna, India<br>
+                raviraj2k09@gmail.com
+            </p>
+        </section>
+
+        <section class="page page-dedication" id="page-dedication">
+            <div class="fleuron" aria-hidden="true">❦</div>
+            <p class="dedication-line">To my parents, who gave me the courage to dream.</p>
+            <p class="dedication-line">To my sisters, who taught me patience.</p>
+            <p class="dedication-line">To the friends who stayed.</p>
+            <div class="fleuron" aria-hidden="true">❦</div>
+            <p class="dedication-sign">— Ravi Raj Singh</p>
+        </section>
+
+        <section class="page page-note" id="page-note">
+            <h2 class="page-heading">Author's Note</h2>
+            <div class="rule-gold"></div>
+            <p>This book is not fiction. Every name, every date, every memory is real. I wrote it for my parents, my sisters, and for the boy I used to be.</p>
+            <p>Some memories are painful. Some are joyful. All of them are mine.</p>
+            <p>I have tried to be honest. I have tried to remember things exactly as they happened — though memory, like everything, fades with time.</p>
+            <p>If you find yourself in these pages, know that you mattered. You still do.</p>
+            <div class="signature-rule"></div>
+            <p class="signature-line">— Ravi Raj Singh</p>
+        </section>
+
+        <section class="page page-toc" id="page-toc">
+            <h2 class="page-heading page-heading-center">Table of Contents</h2>
+            <div class="rule-gold rule-gold-center"></div>
+            <ol class="toc-list" id="toc-list"></ol>
+        </section>
+
+        <section class="page page-how-to-read" id="page-how-to-read">
+            <h2 class="page-heading page-heading-center">How to Read This Book</h2>
+            <div class="rule-gold rule-gold-center"></div>
+            <p>This is a memoir — a true story of a boy growing up in Begusarai, Bihar. It covers the years 2008 to 2019, across eleven chapters.</p>
+            <p>You can read it in order, or begin anywhere. Each chapter is a self-contained memory. The Hinglish edition is available alongside the English.</p>
+            <p>The story continues. It is still being written.</p>
+            <div class="fleuron" aria-hidden="true">❦</div>
+            <p class="how-to-read-closing">Begin anywhere. Read slowly.<br>This story belongs to you now.</p>
+        </section>
+
+        <div id="book-content" class="book-content"></div>
+
+        <section class="page page-story-behind" id="page-story-behind">
+            <h2 class="page-heading page-heading-center">The Story Behind the Story</h2>
+            <div class="rule-gold rule-gold-center"></div>
+            <p>I didn't plan to write a book. I started writing — one memory at a time. One evening. One cup of chai.</p>
+            <p>It began as a diary. Then it became a way to understand myself.</p>
+            <p>I wrote about my childhood because I wanted to remember it. I wrote about my struggles because I wanted to survive them. And I wrote about my dreams because I still believe in them.</p>
+            <p>This book is not the end. It is the beginning of a longer conversation — with myself, and with you.</p>
+            <div class="signature-rule"></div>
+            <p class="signature-line">— Ravi Raj Singh</p>
+        </section>
+
+        <section class="page page-about-author" id="page-about-author">
+            <h2 class="page-heading page-heading-center">About the Author</h2>
+            <div class="rule-gold rule-gold-center"></div>
+            <div class="author-photo-frame">
+                <img src="assets/images/casual.jpg" alt="Ravi Raj Singh" />
+            </div>
+            <p class="author-name">Ravi Raj Singh</p>
+            <p class="author-role">Author</p>
+            <p>Ravi Raj Singh is a writer based in Patna, India. He has kept a personal diary since childhood, and began writing online around 2023–24.</p>
+            <p><em>"A Boy Who Never Thought"</em> is his first book. It grew out of that habit. The book is written in both English and Hinglish, and remains in progress.</p>
+            <p>His writing focuses on ordinary lives, small moments, and the quiet ways a person grows.</p>
+        </section>
+
+        <section class="page page-colophon" id="page-colophon">
+            <div class="fleuron" aria-hidden="true">❦</div>
+            <p class="colophon-line">Written in Patna, India</p>
+            <p class="colophon-line">2026</p>
+            <div class="fleuron" aria-hidden="true">❦</div>
+            <p class="colophon-small">Set in Playfair Display &amp; Lora</p>
+            <p class="colophon-small">Typeset by hand</p>
+            <p class="colophon-small">No frameworks</p>
+        </section>
+
+        <section class="page page-blank" id="page-blank">
+            <p class="blank-note">This page is intentionally left blank.</p>
+        </section>
+
+    </main>
+
+    <script src="js/print.js" defer></script>
+
+</body>
+</html>
