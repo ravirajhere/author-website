@@ -1,0 +1,855 @@
+/* ==========================================================================
+   RAVI RAJ SINGH — PRINT STYLESHEET
+   For: print.html · api/pdf.js (server-side book PDF)
+   Design: Editorial Book · Playfair Display + Lora · Warm Paper
+   ========================================================================== */
+
+/* ==========================================================================
+   1. TOKENS
+   ========================================================================== */
+:root {
+    --paper:        #FFFFFF;
+    --paper-soft:   #FAFAF7;
+    --ink:          #1A1A1A;
+    --soft:         #4A423C;
+    --muted:        #7A7068;
+    --gold:         #8B6F3F;
+    --gold-soft:    rgba(139, 111, 63, 0.08);
+    --line:         #E5DED2;
+    --line-soft:    #F0EDE6;
+
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body:    'Lora', Georgia, serif;
+
+    --page-width:   210mm;
+    --page-height:  297mm;
+    --page-margin:  20mm;
+}
+
+/* ==========================================================================
+   2. RESET
+   ========================================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* ==========================================================================
+   3. SCREEN VIEW (for testing in browser)
+   ========================================================================== */
+@media screen {
+    body {
+        background: #E8E8E3;
+        font-family: var(--font-body);
+        color: var(--ink);
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 80px 20px;
+        font-family: var(--font-display);
+        font-size: 18px;
+        color: var(--muted);
+    }
+
+    .book-root {
+        max-width: var(--page-width);
+        margin: 0 auto;
+    }
+
+    .page {
+        width: var(--page-width);
+        min-height: var(--page-height);
+        padding: var(--page-margin);
+        margin: 0 auto 40px;
+        background: var(--paper);
+        box-shadow:
+            0 1px 2px rgba(28, 26, 23, 0.06),
+            0 12px 40px rgba(28, 26, 23, 0.10);
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+    }
+
+    .page-cover {
+        padding: 0;
+    }
+
+    .page-cover img {
+        width: 100%;
+        height: 100%;
+        min-height: var(--page-height);
+        object-fit: contain;
+    }
+}
+
+/* ==========================================================================
+   4. PRINT VIEW (A4 pages)
+   ========================================================================== */
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    body {
+        background: #FFF;
+        margin: 0;
+        padding: 0;
+        font-family: var(--font-body);
+        color: var(--ink);
+        font-size: 11pt;
+        line-height: 1.65;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .loading {
+        display: none !important;
+    }
+
+    .book-root {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Each page = exactly A4 */
+    .page {
+        width: var(--page-width);
+        height: var(--page-height);
+        padding: var(--page-margin);
+        margin: 0;
+        background: #FFF;
+        box-shadow: none;
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    .page-cover {
+        padding: 0;
+    }
+
+    .page-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+/* ==========================================================================
+   5. COMMON PAGE ELEMENTS
+   ========================================================================== */
+
+/* Page number (running footer) */
+.page-number {
+    position: absolute;
+    bottom: 10mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 9pt;
+    color: var(--muted);
+    letter-spacing: 3px;
+}
+
+/* Page label (section heading at top) */
+.page-label {
+    font-family: var(--font-display);
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20pt;
+}
+
+/* Page heading (main heading) */
+.page-heading {
+    font-family: var(--font-display);
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin-bottom: 12pt;
+    line-height: 1.2;
+}
+
+.page-heading-center {
+    text-align: center;
+}
+
+/* Gold rule */
+.rule-gold {
+    width: 40pt;
+    height: 0.5pt;
+    background: var(--gold);
+    margin-bottom: 24pt;
+}
+
+.rule-gold-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Fleuron (❦) */
+.fleuron {
+    font-family: var(--font-display);
+    font-size: 14pt;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.8em;
+    padding-left: 0.8em;
+    margin: 20pt 0;
+}
+
+/* Signature line */
+.signature-rule {
+    width: 40pt;
+    height: 0.5pt;
+    background: var(--gold);
+    margin: 20pt 0 12pt;
+}
+
+.signature-line {
+    font-family: var(--font-display);
+    font-size: 12pt;
+    color: var(--gold);
+    margin: 0;
+}
+
+/* ==========================================================================
+   6. FRONT MATTER PAGES
+   ========================================================================== */
+
+/* ---------- COVER ---------- */
+.page-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* ---------- HALF TITLE ---------- */
+.page-half-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.half-title {
+    font-family: var(--font-display);
+    font-size: 24pt;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 2px;
+    line-height: 1.3;
+}
+
+/* ---------- FRONTISPIECE ---------- */
+.page-frontispiece {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.frontispiece-frame {
+    width: 100%;
+    max-width: 240pt;
+    border: 0.5pt solid var(--line);
+    padding: 6pt;
+    background: #FFF;
+    margin-bottom: 16pt;
+}
+
+.frontispiece-frame img {
+    width: 100%;
+    height: auto;
+}
+
+.frontispiece-caption {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 2pt 0;
+}
+
+/* ---------- TITLE PAGE ---------- */
+.page-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.title-rule {
+    width: 40pt;
+    height: 0.5pt;
+    background: var(--gold);
+    margin: 24pt auto;
+}
+
+.title-byline {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12pt;
+}
+
+.title-main {
+    font-family: var(--font-display);
+    font-size: 30pt;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 1px;
+    line-height: 1.2;
+    margin-bottom: 16pt;
+}
+
+.title-subtitle {
+    font-family: var(--font-body);
+    font-size: 13pt;
+    font-style: italic;
+    color: var(--soft);
+    margin-bottom: 4pt;
+}
+
+.title-subtitle-hi {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--muted);
+    margin-bottom: 24pt;
+}
+
+.title-author {
+    font-family: var(--font-display);
+    font-size: 16pt;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 1px;
+    margin-bottom: 6pt;
+}
+
+.title-place {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ---------- COPYRIGHT ---------- */
+.page-copyright {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 40mm;
+}
+
+.page-copyright p {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--soft);
+    line-height: 1.7;
+    margin-bottom: 8pt;
+    max-width: 90%;
+}
+
+.copyright-rule {
+    width: 40pt;
+    height: 0.5pt;
+    background: var(--gold);
+    margin: 16pt 0;
+}
+
+.copyright-contact {
+    font-family: var(--font-body);
+    font-size: 8.5pt;
+    color: var(--muted);
+    line-height: 1.8;
+}
+
+/* ---------- DEDICATION ---------- */
+.page-dedication {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.dedication-line {
+    font-family: var(--font-body);
+    font-size: 13pt;
+    font-style: italic;
+    color: var(--soft);
+    line-height: 2;
+    margin: 0 0 4pt;
+}
+
+.dedication-sign {
+    font-family: var(--font-display);
+    font-size: 11pt;
+    color: var(--gold);
+    margin-top: 8pt;
+}
+
+/* ---------- AUTHOR'S NOTE ---------- */
+.page-note {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.page-note p {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--ink);
+    line-height: 1.75;
+    text-align: justify;
+    text-indent: 1.5em;
+    margin-bottom: 10pt;
+}
+
+/* ---------- TABLE OF CONTENTS ---------- */
+.page-toc {
+    padding-top: 30mm;
+}
+
+.toc-list {
+    list-style: none;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.toc-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 12pt;
+    padding: 8pt 0;
+    border-bottom: 0.5pt dotted var(--line);
+}
+
+.toc-num {
+    flex-shrink: 0;
+    width: 50pt;
+    font-family: var(--font-body);
+    font-size: 8pt;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.toc-title {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 12pt;
+    color: var(--ink);
+    line-height: 1.3;
+}
+
+.toc-year {
+    flex-shrink: 0;
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.toc-page-num {
+    flex-shrink: 0;
+    min-width: 20pt;
+    text-align: right;
+    font-family: var(--font-body);
+    font-size: 10pt;
+    color: var(--soft);
+}
+
+/* ---------- HOW TO READ ---------- */
+.page-how-to-read {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.page-how-to-read p {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--ink);
+    line-height: 1.75;
+    text-align: justify;
+    text-indent: 1.5em;
+    margin-bottom: 10pt;
+}
+
+.how-to-read-closing {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 12pt;
+    color: var(--gold);
+    text-align: center;
+    text-indent: 0;
+    line-height: 1.8;
+    margin: 20pt 0 0;
+}
+
+/* ==========================================================================
+   7. CHAPTER PAGES
+   ========================================================================== */
+
+.chapter {
+    width: var(--page-width);
+    height: var(--page-height);
+    padding: var(--page-margin);
+    background: #FFF;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+}
+
+.chapter:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
+
+/* Running header */
+.chapter-running-header {
+    position: absolute;
+    top: 10mm;
+    left: var(--page-margin);
+    right: var(--page-margin);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: #B0AAA2;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 0.5pt solid var(--line-soft);
+    padding-bottom: 4pt;
+}
+
+/* Chapter header block */
+.chapter-header {
+    display: flex;
+    align-items: center;
+    gap: 18pt;
+    margin-bottom: 24pt;
+    padding-bottom: 12pt;
+    border-bottom: 0.5pt solid var(--line);
+}
+
+.chapter-number-circle {
+    flex-shrink: 0;
+    width: 52pt;
+    height: 52pt;
+    border-radius: 50%;
+    background: var(--paper-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 24pt;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.chapter-header-text {
+    flex: 1;
+}
+
+.chapter-number {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4pt;
+}
+
+.chapter-title {
+    font-family: var(--font-display);
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.chapter-year {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    font-style: italic;
+    color: var(--muted);
+    margin: 4pt 0 0;
+}
+
+/* Chapter body */
+.chapter-body p {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--ink);
+    line-height: 1.75;
+    text-align: justify;
+    margin-bottom: 10pt;
+    letter-spacing: 0.2px;
+}
+
+/* Drop cap (first paragraph of each chapter) */
+.chapter-body p:first-of-type {
+    position: relative;
+    padding-left: 44pt;
+    min-height: 48pt;
+}
+
+.chapter-body p:first-of-type::first-letter {
+    position: absolute;
+    top: -4pt;
+    left: 0;
+    width: 40pt;
+    height: 48pt;
+    font-family: var(--font-display);
+    font-size: 48pt;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 48pt;
+    text-align: left;
+    float: none;
+}
+
+/* Strong and em */
+.chapter-body strong {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.chapter-body em {
+    color: var(--soft);
+    font-style: italic;
+}
+
+/* Pull quote */
+.chapter-body .pull-quote {
+    border: none;
+    padding: 12pt 0;
+    margin: 20pt 0;
+    text-align: center;
+    background: transparent;
+}
+
+.chapter-body .pull-quote p {
+    font-family: var(--font-display);
+    font-size: 13pt;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.6;
+    text-align: center;
+    margin: 0 0 6pt;
+}
+
+.chapter-body .pull-quote footer {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    font-style: normal;
+}
+
+/* Fleuron before/after pull quote */
+.chapter-body .pull-quote::before,
+.chapter-body .pull-quote::after {
+    content: '❦';
+    display: block;
+    font-family: var(--font-display);
+    font-size: 12pt;
+    color: var(--gold);
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+    margin: 8pt 0;
+}
+
+/* Photo figure */
+.chapter-body .chapter-photo {
+    margin: 20pt auto;
+    max-width: 240pt;
+    text-align: center;
+}
+
+.chapter-body .chapter-photo img {
+    width: 100%;
+    height: auto;
+    border: 0.5pt solid var(--line);
+    margin-bottom: 8pt;
+}
+
+.chapter-body .chapter-photo figcaption {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Footnote */
+.chapter-body .footnote {
+    color: var(--gold);
+    border-bottom: none;
+    cursor: default;
+}
+
+/* Page number */
+.chapter-page-number {
+    position: absolute;
+    bottom: 10mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 9pt;
+    color: #B0AAA2;
+    letter-spacing: 3px;
+}
+
+/* ==========================================================================
+   8. BACK MATTER PAGES
+   ========================================================================== */
+
+/* ---------- STORY BEHIND ---------- */
+.page-story-behind {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.page-story-behind p {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--ink);
+    line-height: 1.75;
+    text-align: justify;
+    text-indent: 1.5em;
+    margin-bottom: 10pt;
+}
+
+/* ---------- ABOUT AUTHOR ---------- */
+.page-about-author {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.page-about-author p {
+    font-family: var(--font-body);
+    font-size: 10.5pt;
+    color: var(--ink);
+    line-height: 1.7;
+    text-align: justify;
+    margin-bottom: 10pt;
+    width: 100%;
+}
+
+.author-photo-frame {
+    width: 100pt;
+    height: 100pt;
+    border-radius: 50%;
+    border: 1pt solid var(--gold);
+    overflow: hidden;
+    margin: 12pt auto;
+}
+
+.author-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-name {
+    font-family: var(--font-display);
+    font-size: 16pt;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 8pt 0 2pt;
+    text-align: center;
+}
+
+.author-role {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 20pt;
+    text-align: center;
+}
+
+/* ---------- COLOPHON ---------- */
+.page-colophon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.colophon-line {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    color: var(--soft);
+    line-height: 2;
+}
+
+.colophon-small {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--muted);
+    line-height: 1.9;
+}
+
+/* ---------- BLANK ---------- */
+.page-blank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blank-note {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: #C0BAB1;
+    font-style: italic;
+    letter-spacing: 2px;
+}
