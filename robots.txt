@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /print.html
+Disallow: /404.html
+
+Sitemap: https://ravirajhere-author.vercel.app/sitemap.xml
