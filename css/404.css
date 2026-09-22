@@ -1,28 +1,29 @@
 /* ==========================================================================
-   RAVI RAJ — 404 STYLESHEET
-   Design: Playful · Dark · Editorial
-   Companion: 404.html
+   RAVI RAJ SINGH — 404 STYLESHEET
+   Design: Playful · Cream + Gold · Editorial
+   Companion: 404.html (author-website)
    ========================================================================== */
 
 /* ---------- TOKENS ---------- */
 :root {
-    --bg: #0a0a0a;
-    --bg-soft: #111111;
-    --bg-elev: #171717;
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.14);
+    --paper: #F7F4EE;
+    --paper-soft: #F1ECE3;
+    --paper-elev: #FFFFFF;
+    --border: rgba(28, 26, 23, 0.10);
+    --border-strong: rgba(28, 26, 23, 0.20);
 
-    --text: #ededed;
-    --text-soft: #a3a3a3;
-    --text-muted: #737373;
+    --text: #1C1A17;
+    --text-soft: #4A423C;
+    --text-muted: #7A7068;
 
-    --accent: #b45309;
-    --accent-soft: rgba(180, 83, 9, 0.10);
-    --accent-hover: #92400e;
+    --accent: #8B6F3F;
+    --accent-dark: #6E5630;
+    --accent-soft: rgba(139, 111, 63, 0.10);
     --gold: #8B6F3F;
 
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-serif: 'Source Serif 4', Georgia, serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-body: 'Lora', Georgia, serif;
     --font-mono: 'JetBrains Mono', monospace;
 
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -45,7 +46,7 @@ body {
     font-size: 16px;
     line-height: 1.6;
     color: var(--text);
-    background: var(--bg);
+    background: var(--paper);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -77,7 +78,7 @@ code, kbd {
 }
 
 kbd {
-    background: var(--border);
+    background: var(--paper-soft);
     border: 1px solid var(--border-strong);
     padding: 0.1em 0.45em;
     border-radius: 2px;
@@ -205,6 +206,7 @@ kbd {
 }
 
 .error-lede {
+    font-family: var(--font-body);
     font-size: 16px;
     line-height: 1.7;
     color: var(--text-soft);
@@ -226,14 +228,16 @@ kbd {
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
+    font-family: var(--font-body);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     border-radius: 6px;
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s var(--ease);
     white-space: nowrap;
     text-decoration: none;
+    letter-spacing: 0.2px;
 }
 
 .btn-lg {
@@ -243,13 +247,14 @@ kbd {
 
 .btn-primary {
     background: var(--text);
-    color: var(--bg);
+    color: var(--paper);
     border-color: var(--text);
 }
 
 .btn-primary:hover {
-    background: #fff;
-    border-color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
 }
 
 .btn-primary svg {
@@ -268,8 +273,8 @@ kbd {
 
 .btn-quiet:hover {
     color: var(--text);
-    border-color: var(--text-soft);
-    background: var(--border);
+    border-color: var(--text);
+    background: var(--paper-elev);
 }
 
 .btn-quiet kbd {
@@ -281,7 +286,7 @@ kbd {
     max-width: 480px;
     margin: 0 auto 40px;
     padding: 24px;
-    background: var(--bg-soft);
+    background: var(--paper-soft);
     border: 1px solid var(--border);
     border-radius: 8px;
 }
@@ -311,6 +316,7 @@ kbd {
     padding: 10px 12px;
     border-radius: 4px;
     color: var(--text-soft);
+    font-family: var(--font-body);
     font-size: 15px;
     transition: all 0.15s var(--ease);
     cursor: pointer;
@@ -318,7 +324,7 @@ kbd {
 
 .error-links-list a:hover {
     color: var(--text);
-    background: var(--border);
+    background: var(--paper-elev);
     padding-left: 18px;
 }
 
