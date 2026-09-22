@@ -10,7 +10,10 @@ Live: [ravirajhere-author.vercel.app](https://ravirajhere-author.vercel.app)
 
 The author website for **"A Boy Who Never Thought"** — an 11-chapter bilingual memoir covering 2008 to 2019. Built with hand-written HTML, CSS, and JavaScript, plus a serverless backend for newsletter signups and book PDF generation.
 
-**Companion project:** [Portfolio](https://github.com/ravirajhere/Ravirajhere.github.io) — frontend developer portfolio.
+**Companion projects:**
+- [Portfolio](https://github.com/ravirajhere/portfolio) — frontend developer portfolio
+- [Snake Game](https://github.com/ravirajhere/snake-game) — Nokia Snake, hand-written
+- [CLI Portfolio](https://github.com/ravirajhere/cli-portfolio) — `npx ravirajhere`
 
 ---
 
@@ -43,6 +46,7 @@ Read free: [book.html](book.html)
 - **HTML5** — hand-written, semantic
 - **CSS3** — custom properties, no frameworks
 - **JavaScript** — vanilla, no dependencies
+- **No build step** — every line written by hand
 
 ### Backend (Serverless)
 
@@ -75,10 +79,12 @@ Read free: [book.html](book.html)
 
 ### Infrastructure
 
-- **Custom 404** — playful error page
-- **SEO** — canonical tags, OG tags, Schema.org JSON-LD (Person + Book)
+- **Custom 404** — playful error page (cream + gold theme)
+- **SEO** — canonical tags, OG tags, Twitter cards, Schema.org JSON-LD (Person + Book), sitemap.xml, robots.txt
+- **Analytics** — Vercel Web Analytics (privacy-friendly, no cookies)
 - **Accessibility** — skip links, focus states, ARIA labels, reduced-motion
 - **Security** — server-side keys, rate limiting, honeypot, CORS headers
+- **Social** — custom OG image (`og-cover.jpg`, 1200×630)
 
 ---
 
@@ -90,6 +96,8 @@ Read free: [book.html](book.html)
     ├── book.html               # Book reader (11 chapters, EN + HI)
     ├── print.html              # Print route for PDF (noindex)
     ├── 404.html                # Custom 404
+    ├── sitemap.xml             # SEO sitemap
+    ├── robots.txt              # Crawler rules
     ├── package.json            # Backend dependencies
     ├── vercel.json             # Function config
     ├── api/                    # Serverless functions
@@ -114,7 +122,8 @@ Read free: [book.html](book.html)
             ├── signature.jpg
             ├── child.jpg
             ├── 2010s.jpg
-            └── bday-12.jpg
+            ├── bday-12.jpg
+            └── og-cover.jpg    # Social share image (1200×630)
 
 ---
 
