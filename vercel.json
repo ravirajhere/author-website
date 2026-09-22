@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/subscribe.js": {
+      "maxDuration": 30
+    },
+    "api/book-pdf.js": {
+      "maxDuration": 300
+    }
+  }
+}
