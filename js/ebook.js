@@ -1,8 +1,8 @@
 /* ==========================================================================
-   RAVI RAJ SINGH — EBOOK GENERATOR v4.1
-   v4 + fix: drop cap position (float → position:absolute)
+   RAVI RAJ SINGH — EBOOK GENERATOR v4.2
+   v4.1 + drop cap removed + back cover page added
    Companion: book.html · book.js · book.css
-   Version: 4.1
+   Version: 4.2
    ========================================================================== */
 
 // ============================================================
@@ -18,6 +18,7 @@ const EBOOK_CONFIG = {
     currentYear: new Date().getFullYear(),
     images: {
         cover: 'assets/images/bookcover.jpg',
+        backCover: 'assets/images/backcover.jpg',
         author: 'assets/images/casual.jpg',
         signature: 'assets/images/signature.jpg'
     },
@@ -156,6 +157,7 @@ async function waitForFonts() {
 async function preloadAllImages() {
     const srcs = [
         EBOOK_CONFIG.images.cover,
+        EBOOK_CONFIG.images.backCover,
         EBOOK_CONFIG.images.author,
         EBOOK_CONFIG.images.signature
     ];
@@ -449,6 +451,7 @@ class EbookGenerator {
 
         const add = function (fn) { pages.push(fn()); };
 
+        // ---- FRONT MATTER (9 pages) ----
         add(() => this.pageCover(images.cover));
         add(() => this.pageHalfTitle());
         add(() => this.pageFrontispiece(images.author));
@@ -459,14 +462,17 @@ class EbookGenerator {
         add(() => this.pageTOC(content.chapters));
         add(() => this.pageHowToRead());
 
+        // ---- CHAPTERS ----
         content.chapters.forEach((ch, i) => {
             add(() => this.pageChapter(ch, i));
         });
 
+        // ---- BACK MATTER (5 pages) ----
         add(() => this.pageStoryBehind());
         add(() => this.pageAboutAuthor(images.author, qrDataUrl));
         add(() => this.pageColophon());
         add(() => this.pageBlank());
+        add(() => this.pageBackCover(images.backCover));
 
         return pages;
     }
@@ -477,6 +483,13 @@ class EbookGenerator {
         const div = document.createElement('div');
         div.style.cssText = 'padding:0;margin:0;background:#ffffff;width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
         div.innerHTML = '<img src="' + coverImage + '" alt="Book Cover" style="width:100%;height:100%;object-fit:contain;">';
+        return div;
+    }
+
+    pageBackCover(backCoverImage) {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:0;margin:0;background:#ffffff;width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
+        div.innerHTML = '<img src="' + backCoverImage + '" alt="Back Cover" style="width:100%;height:100%;object-fit:contain;">';
         return div;
     }
 
@@ -649,7 +662,7 @@ class EbookGenerator {
     }
 
     // ========================================================
-    // ⭐ FIXED: Drop cap with position:absolute (not float)
+    // ⭐ v4.2: Drop cap removed, clean opening paragraph
     // ========================================================
     pageChapter(chapterEl, index) {
         const div = document.createElement('div');
@@ -698,37 +711,12 @@ class EbookGenerator {
             el.style.letterSpacing = '0.2px';
             el.style.background = 'transparent';
 
-            // ---- FIRST PARAGRAPH: drop cap via position:absolute ----
-            if (i === 0 && el.textContent.trim().length > 0) {
-                const text = el.textContent.trim();
-                const firstChar = text.charAt(0);
-                const rest = text.slice(1);
-
-                // Make paragraph relative + add left padding for drop cap
-                el.style.position = 'relative';
-                el.style.paddingLeft = '52px';
-                el.style.minHeight = '56px';
-
-                // Drop cap positioned absolutely at top-left
-                el.innerHTML =
-                    '<span style="' +
-                        'position:absolute;' +
-                        'top:-4px;' +
-                        'left:0;' +
-                        'width:44px;' +
-                        'height:56px;' +
-                        'font-family:' + S.serifHead + ';' +
-                        'font-size:52px;' +
-                        'font-weight:700;' +
-                        'color:' + S.gold + ';' +
-                        'line-height:56px;' +
-                        'text-align:left;' +
-                        'display:block;' +
-                        'overflow:visible;' +
-                    '">' +
-                        firstChar +
-                    '</span>' +
-                    '<span style="display:inline;">' + rest + '</span>';
+            // ---- FIRST PARAGRAPH: subtle opening, no drop cap ----
+            if (i === 0) {
+                el.style.fontSize = '13.5px';
+                el.style.lineHeight = '1.85';
+                el.style.color = S.soft;
+                el.style.marginBottom = '16px';
             }
         });
 
@@ -1132,4 +1120,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-console.log('✅ ebook.js v4.1 loaded — drop cap fixed, file size optimized');
+console.log('✅ ebook.js v4.2 loaded — drop cap removed, back cover added');
