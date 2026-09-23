@@ -1,6 +1,6 @@
 /* ==========================================================================
    RAVI RAJ SINGH — BOOK READER SCRIPT
-   Version: 1.1
+   Version: 1.2 — 18 chapters + scroll fix + tooltip fix
    Handles: Header state · Sidebar drawer · Language switch
             Chapter navigation · Reading progress · Hash sync
             Footnotes · Keyboard nav · External links · Console greeting
@@ -45,7 +45,7 @@
         catch (e) { return false; }
     }
 
-    const TOTAL_CHAPTERS = 11;
+    const TOTAL_CHAPTERS = 18;
 
     /* ======================================================================
        2. STATE
@@ -376,14 +376,15 @@
             return;
         }
 
-        /* Prefer a heading inside the chapter */
-        const heading = chapterEl.querySelector('h1, h2, h3, .chapter-title, .chapter-heading')
-                     || chapterEl;
+        /* Scroll to chapter number (top of chapter) */
+        const target = chapterEl.querySelector('.chapter-num')
+                    || chapterEl.querySelector('.chapter-head')
+                    || chapterEl;
 
         const headerOffset = header ? header.offsetHeight : 0;
-        const buffer = 16; /* breathing room below sticky header */
+        const buffer = 20; /* breathing room below sticky header */
 
-        const rect = heading.getBoundingClientRect();
+        const rect = target.getBoundingClientRect();
         const currentY = window.pageYOffset || document.documentElement.scrollTop;
         const targetY = Math.max(0, rect.top + currentY - headerOffset - buffer);
 
@@ -582,23 +583,25 @@
             tooltip.textContent = note;
             tooltip.classList.add('visible');
 
-            /* Position after content is set */
-            const rect = el.getBoundingClientRect();
-            const tr = tooltip.getBoundingClientRect();
+            /* Wait for layout before measuring */
+            requestAnimationFrame(function () {
+                const rect = el.getBoundingClientRect();
+                const tr = tooltip.getBoundingClientRect();
 
-            let left = rect.left + (rect.width / 2) - (tr.width / 2);
-            let top = rect.top - tr.height - 10;
+                let left = rect.left + (rect.width / 2) - (tr.width / 2);
+                let top = rect.top - tr.height - 10;
 
-            if (left < 10) left = 10;
-            if (left + tr.width > window.innerWidth - 10) {
-                left = window.innerWidth - tr.width - 10;
-            }
-            if (top < 10) {
-                top = rect.bottom + 10;
-            }
+                if (left < 10) left = 10;
+                if (left + tr.width > window.innerWidth - 10) {
+                    left = window.innerWidth - tr.width - 10;
+                }
+                if (top < 10) {
+                    top = rect.bottom + 10;
+                }
 
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            });
         }
 
         function hideTooltip() {
@@ -712,7 +715,7 @@
 
         try {
             console.log('%c"A Boy Who Never Thought"', 'font-size:14px;font-weight:700;' + accent);
-            console.log('%c11 chapters · English & Hinglish', 'font-size:12px;' + soft);
+            console.log('%c18 chapters · English & Hinglish', 'font-size:12px;' + soft);
             console.log('%c← → to navigate · Back to author: /author.html', 'font-size:12px;' + soft);
 
             sessionSet('rrs-book-greeted', '1');
