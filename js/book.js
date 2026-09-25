@@ -1,6 +1,6 @@
 /* ==========================================================================
    RAVI RAJ SINGH — BOOK READER SCRIPT
-   Version: 1.3 — 18 chapters + running header check + placeholder-safe
+   Version: 1.4 — Download buttons removed (server-side PDF via GitHub Actions)
    Handles: Header state · Sidebar drawer · Language switch
             Chapter navigation · Reading progress · Hash sync
             Footnotes · Keyboard nav · External links · Console greeting
@@ -73,9 +73,6 @@
     const progressFill    = $('#progressFill');
     const progressPercent = $('#progressPercent');
     const progressBar     = $('.progress-bar');
-
-    const downloadEn   = $('#downloadEn');
-    const downloadHi   = $('#downloadHi');
 
     const yearEl       = $('#year');
 
@@ -663,38 +660,7 @@
     })();
 
     /* ======================================================================
-       14. DOWNLOAD BUTTONS
-       ====================================================================== */
-    if (downloadEn) {
-        downloadEn.addEventListener('click', function () {
-            if (typeof window.downloadEnglishEbook === 'function') {
-                try {
-                    window.downloadEnglishEbook();
-                } catch (err) {
-                    console.error('Download English failed:', err);
-                }
-            } else {
-                console.warn('ebook.js not loaded — downloadEnglishEbook unavailable');
-            }
-        });
-    }
-
-    if (downloadHi) {
-        downloadHi.addEventListener('click', function () {
-            if (typeof window.downloadHinglishEbook === 'function') {
-                try {
-                    window.downloadHinglishEbook();
-                } catch (err) {
-                    console.error('Download Hinglish failed:', err);
-                }
-            } else {
-                console.warn('ebook.js not loaded — downloadHinglishEbook unavailable');
-            }
-        });
-    }
-
-    /* ======================================================================
-       15. EXTERNAL LINKS SECURITY
+       14. EXTERNAL LINKS SECURITY
        ====================================================================== */
     $$('a[target="_blank"]').forEach(function (link) {
         const rel = link.getAttribute('rel') || '';
@@ -704,7 +670,7 @@
     });
 
     /* ======================================================================
-       16. RUNNING HEADER VERIFICATION
+       15. RUNNING HEADER VERIFICATION
        ====================================================================== */
     (function verifyRunningHeaders() {
         const containers = [chaptersEn, chaptersHi].filter(Boolean);
@@ -731,7 +697,7 @@
     })();
 
     /* ======================================================================
-       17. CONSOLE GREETING (once per session)
+       16. CONSOLE GREETING (once per session)
        ====================================================================== */
     (function greet() {
         const hasGreeted = sessionGet('rrs-book-greeted');
@@ -750,7 +716,7 @@
     })();
 
     /* ======================================================================
-       18. INIT
+       17. INIT
        ====================================================================== */
     function init() {
         const safe = function (name, fn) {
@@ -765,7 +731,7 @@
         document.body.classList.add('js-ready');
 
         try {
-            console.log('✅ book.js v1.3 loaded');
+            console.log('✅ book.js v1.4 loaded');
         } catch (e) {}
     }
 
