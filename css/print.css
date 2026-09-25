@@ -1,6 +1,6 @@
 /* ==========================================================================
    RAVI RAJ SINGH — PRINT STYLESHEET
-   Version: 2.0 — Vintage Old Book (Cream Paper + Ornaments + Footnotes)
+   Version: 2.1 — Cream background fix + drop cap scope fix
    For: print.html · print.js
    Design: Editorial Book · Playfair Display + Lora · Warm Paper
    ========================================================================== */
@@ -40,6 +40,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+html {
+    background: var(--paper);
 }
 
 img {
@@ -119,11 +123,13 @@ img {
 @page {
     size: A4;
     margin: 0;
+    background: #FBF8F1;
 }
 
 @media print {
+    html,
     body {
-        background: #FFF;
+        background: #FBF8F1;
         margin: 0;
         padding: 0;
         font-family: var(--font-body);
@@ -619,7 +625,7 @@ img {
 
 .chapter {
     width: var(--page-width);
-    min-height: var(--page-height);
+    height: var(--page-height);
     padding: var(--page-margin);
     background: var(--paper);
     position: relative;
@@ -716,7 +722,8 @@ img {
     text-indent: 1.5em;
 }
 
-.chapter-body p:first-of-type {
+.chapter-body > p:first-of-type,
+.chapter-body > p:first-child {
     font-size: 11.5pt;
     line-height: 1.85;
     color: var(--soft);
@@ -724,8 +731,9 @@ img {
     margin-bottom: 6pt;
 }
 
-/* Drop cap */
-.chapter-body p:first-of-type::first-letter {
+/* Drop cap — only in main body, not in notes */
+.chapter-body > p:first-of-type::first-letter,
+.chapter-body > p:first-child::first-letter {
     font-family: var(--font-display);
     font-size: 3.4em;
     font-weight: 700;
@@ -734,6 +742,18 @@ img {
     margin: 0.08em 0.08em 0 0;
     color: var(--gold);
     text-indent: 0;
+}
+
+/* No drop cap in notes section */
+.chapter-notes p::first-letter,
+.chapter-notes-heading::first-letter {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    float: none !important;
+    color: inherit !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+    font-family: inherit !important;
 }
 
 /* Strong and em */
