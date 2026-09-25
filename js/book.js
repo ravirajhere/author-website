@@ -1,6 +1,6 @@
 /* ==========================================================================
    RAVI RAJ SINGH — BOOK READER SCRIPT
-   Version: 1.2 — 18 chapters + scroll fix + tooltip fix
+   Version: 1.3 — 18 chapters + running header check + placeholder-safe
    Handles: Header state · Sidebar drawer · Language switch
             Chapter navigation · Reading progress · Hash sync
             Footnotes · Keyboard nav · External links · Console greeting
@@ -704,7 +704,34 @@
     });
 
     /* ======================================================================
-       16. CONSOLE GREETING (once per session)
+       16. RUNNING HEADER VERIFICATION
+       ====================================================================== */
+    (function verifyRunningHeaders() {
+        const containers = [chaptersEn, chaptersHi].filter(Boolean);
+        let missing = 0;
+
+        containers.forEach(function (container) {
+            const chapters = $$('.chapter', container);
+            chapters.forEach(function (ch) {
+                const rh = ch.querySelector('.chapter-running-header');
+                if (!rh) {
+                    missing++;
+                    console.warn(
+                        '[book.js] Missing .chapter-running-header in',
+                        'chapter', ch.dataset.chapter,
+                        'lang', container.id
+                    );
+                }
+            });
+        });
+
+        if (missing === 0) {
+            console.log('[book.js] ✅ All chapters have running headers');
+        }
+    })();
+
+    /* ======================================================================
+       17. CONSOLE GREETING (once per session)
        ====================================================================== */
     (function greet() {
         const hasGreeted = sessionGet('rrs-book-greeted');
@@ -723,7 +750,7 @@
     })();
 
     /* ======================================================================
-       17. INIT
+       18. INIT
        ====================================================================== */
     function init() {
         const safe = function (name, fn) {
@@ -738,7 +765,7 @@
         document.body.classList.add('js-ready');
 
         try {
-            console.log('✅ book.js loaded');
+            console.log('✅ book.js v1.3 loaded');
         } catch (e) {}
     }
 
