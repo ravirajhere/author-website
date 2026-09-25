@@ -1,13 +1,13 @@
 /* ==========================================================================
    RAVI RAJ SINGH — PRINT SCRIPT
-   Version: 5.1 — Vintage old book + Footnotes + Multi-page + Dynamic sizing
+   Version: 5.2 — Fix: page overflow + drop cap on continued pages
    Companion: print.html · print.css · book.html
    ========================================================================== */
 
 (function () {
     'use strict';
 
-    console.log('[print] v5.1 starting');
+    console.log('[print] v5.2 starting');
 
     /* ======================================================================
        1. CONFIG
@@ -32,17 +32,23 @@
     var PAGE_WIDTH_MM = 210;
     var PAGE_HEIGHT_MM = 297;
     var PAGE_MARGIN_MM = 20;
-    var RUNNING_HEADER_MM = 14;
     var MM_TO_PX = 3.7795;
 
     /* Usable content width inside .chapter (after padding) */
     var CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);
     var CONTENT_WIDTH_PX = Math.round(CONTENT_WIDTH_MM * MM_TO_PX);
 
-    /* Usable content height per page (for measurement) */
-    /* .chapter height = 297mm, padding top/bottom = 40mm, running header ~14mm */
-    /* Total usable = 297 - 40 - 14 = 243mm */
-    var USABLE_CONTENT_PX = Math.round(243 * MM_TO_PX);
+    /* Usable content height per page (for measurement)
+       Conservative estimate:
+       - .chapter height = 297mm
+       - padding top + bottom = 40mm
+       - running header = ~14mm
+       - chapter header (first page) = ~30mm
+       - page number footer = ~10mm
+       - buffer for safety = ~23mm
+       Total usable = 297 - 40 - 14 - 30 - 10 - 23 = 180mm
+    */
+    var USABLE_CONTENT_PX = Math.round(180 * MM_TO_PX);
 
     /* ======================================================================
        2. IMMEDIATE UI FEEDBACK
@@ -191,8 +197,6 @@
 
     /* ======================================================================
        7. FOOTNOTE PROCESSING
-       Extracts footnotes from a chapter body, replaces <span class="footnote">
-       with superscript markers, returns { cleanBody, notesList }
        ====================================================================== */
     function processFootnotes(bodyEl) {
         var clone = bodyEl.cloneNode(true);
@@ -457,9 +461,11 @@
             page.appendChild(headerBlock);
         }
 
-        /* Body */
+        /* Body — different class on continued pages */
         var bodyWrapper = document.createElement('div');
-        bodyWrapper.className = 'chapter-body';
+        bodyWrapper.className = opts.isFirstPage
+            ? 'chapter-body'
+            : 'chapter-body chapter-body-continued';
         for (var i = 0; i < opts.blocks.length; i++) {
             bodyWrapper.appendChild(opts.blocks[i].cloneNode(true));
         }
