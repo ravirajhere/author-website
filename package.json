@@ -1,4 +1,4 @@
- {
+{
   "name": "ravirajhere-author",
   "version": "1.0.0",
   "private": true,
@@ -8,8 +8,6 @@
   },
   "dependencies": {
     "resend": "^4.0.0",
-    "puppeteer-core": "23.11.1",
-    "@sparticuz/chromium": "131.0.1",
     "@vercel/blob": "^0.27.0",
     "@supabase/supabase-js": "^2.45.0"
   },
