@@ -5,20 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Print — A Boy Who Never Thought</title>
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#FBF8F1" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="css/print.css" />
 </head>
 <body>
 
     <div id="loading" class="loading">
-        <p>Loading book…</p>
+        <p>Preparing your book…</p>
     </div>
 
     <main id="book-root" class="book-root" hidden>
+
+        <!-- ============================================================
+             FRONT MATTER
+        ============================================================ -->
 
         <section class="page page-cover" id="page-cover">
             <img src="assets/images/bookcover.jpg" alt="A Boy Who Never Thought" />
@@ -90,14 +95,21 @@
         <section class="page page-how-to-read" id="page-how-to-read">
             <h2 class="page-heading page-heading-center">How to Read This Book</h2>
             <div class="rule-gold rule-gold-center"></div>
-            <p>This is a memoir — a true story of a boy growing up in Begusarai, Bihar. It covers the years 2008 to 2019, across eleven chapters.</p>
+            <p>This is a memoir — a true story of a boy growing up in Begusarai, Bihar. It covers the years 2008 to 2026, across eighteen chapters.</p>
             <p>You can read it in order, or begin anywhere. Each chapter is a self-contained memory. The Hinglish edition is available alongside the English.</p>
             <p>The story continues. It is still being written.</p>
             <div class="fleuron" aria-hidden="true">❦</div>
             <p class="how-to-read-closing">Begin anywhere. Read slowly.<br>This story belongs to you now.</p>
         </section>
 
+        <!-- ============================================================
+             CHAPTERS (populated by print.js)
+        ============================================================ -->
         <div id="book-content" class="book-content"></div>
+
+        <!-- ============================================================
+             BACK MATTER
+        ============================================================ -->
 
         <section class="page page-story-behind" id="page-story-behind">
             <h2 class="page-heading page-heading-center">The Story Behind the Story</h2>
@@ -137,7 +149,6 @@
             <p class="blank-note">This page is intentionally left blank.</p>
         </section>
 
-        <!-- ⭐ NEW: Back cover (v4.2) -->
         <section class="page page-back-cover" id="page-back-cover">
             <img src="assets/images/backcover.jpg" alt="Back Cover" />
         </section>
@@ -145,7 +156,7 @@
     </main>
 
     <script src="js/print.js" defer></script>
-    
+
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
