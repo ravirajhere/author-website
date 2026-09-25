@@ -128,14 +128,18 @@
         <div class="sidebar-download">
             <p class="sidebar-label">Download</p>
             <div class="download-actions">
-                <button type="button" class="btn btn-primary" id="downloadEn">
+                <a href="assets/pdfs/A_Boy_Who_Never_Thought_English.pdf"
+                   download
+                   class="btn btn-primary">
                     Download English
                     <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2V9M6 9L3 6M6 9L9 6M2 10H10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <button type="button" class="btn btn-quiet" id="downloadHi">
+                </a>
+                <a href="assets/pdfs/A_Boy_Who_Never_Thought_Hinglish.pdf"
+                   download
+                   class="btn btn-quiet">
                     Download Hinglish
                     <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2V9M6 9L3 6M6 9L9 6M2 10H10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
+                </a>
             </div>
         </div>
 
@@ -828,8 +832,7 @@
         </div>
 
         <!-- ============================================================
-             HINGLISH CHAPTERS — Same structure, no footnotes, <div> for chapter-rule
-             (Keeping these brief for now — updating content later)
+             HINGLISH CHAPTERS
         ============================================================ -->
         <div id="chaptersHi" lang="hi" class="chapters" hidden>
 
@@ -1009,8 +1012,6 @@
                     <a href="#chapter-3-hi" class="nav-btn nav-next">Next →</a>
                 </nav>
             </article>
-
-            <!-- CHAPTERS 3-10 (HI) — keep existing structure but replace <hr> with <div> and add running header — abbreviated here for brevity -->
 
             <!-- CHAPTER 3 (HI) -->
             <article class="chapter" data-chapter="3" id="chapter-3-hi">
@@ -1508,7 +1509,6 @@
     </footer>
 
     <script src="js/book.js" defer></script>
-    <script src="js/ebook.js" defer></script>
     <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
