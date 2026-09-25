@@ -1,10 +1,8 @@
-name: Generate Book PDFs
+ name: Generate Book PDFs
 
 on:
-  # Manual trigger from GitHub UI
   workflow_dispatch:
-  
-  # Auto-trigger when book.html or print files change
+
   push:
     branches: [main]
     paths:
@@ -17,10 +15,10 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -28,21 +26,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --include=dev --no-audit --no-fund
 
-      - name: Install Chromium for Puppeteer
+      - name: Start local HTTP server
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
-      - name: Setup local HTTP server
-        run: |
-          npx --yes http-server . -p 8080 -s &
-          sleep 3
+          python3 -m http.server 8080 &
+          sleep 2
           curl -s -I http://localhost:8080/print.html | head -1
 
       - name: Generate PDFs
