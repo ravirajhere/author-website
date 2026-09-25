@@ -1,13 +1,13 @@
 /* ==========================================================================
    RAVI RAJ SINGH — PRINT SCRIPT
-   Version: 5.0 — Vintage old book + Footnotes + Multi-page + Dynamic sizing
+   Version: 5.1 — Vintage old book + Footnotes + Multi-page + Dynamic sizing
    Companion: print.html · print.css · book.html
    ========================================================================== */
 
 (function () {
     'use strict';
 
-    console.log('[print] v5.0 starting');
+    console.log('[print] v5.1 starting');
 
     /* ======================================================================
        1. CONFIG
@@ -31,18 +31,18 @@
     /* Page geometry — derived from print.css values */
     var PAGE_WIDTH_MM = 210;
     var PAGE_HEIGHT_MM = 297;
-    var PAGE_MARGIN_MM = 20;           /* matches --page-margin in print.css */
-    var RUNNING_HEADER_MM = 14;        /* running header + padding */
-    var MM_TO_PX = 3.7795;             /* 1mm = 3.7795px at 96dpi */
+    var PAGE_MARGIN_MM = 20;
+    var RUNNING_HEADER_MM = 14;
+    var MM_TO_PX = 3.7795;
 
     /* Usable content width inside .chapter (after padding) */
-    var CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);  /* = 170mm */
+    var CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);
     var CONTENT_WIDTH_PX = Math.round(CONTENT_WIDTH_MM * MM_TO_PX);
 
     /* Usable content height per page (for measurement) */
     /* .chapter height = 297mm, padding top/bottom = 40mm, running header ~14mm */
     /* Total usable = 297 - 40 - 14 = 243mm */
-    var USABLE_CONTENT_PX = Math.round(243 * MM_TO_PX);  /* = ~919px */
+    var USABLE_CONTENT_PX = Math.round(243 * MM_TO_PX);
 
     /* ======================================================================
        2. IMMEDIATE UI FEEDBACK
@@ -199,12 +199,18 @@
         var footnotes = Array.prototype.slice.call(clone.querySelectorAll('.footnote'));
         var notesList = [];
 
-        footnotes.forEach(function (fn, idx) {
+        footnotes.forEach(function (fn) {
             var noteText = fn.getAttribute('data-note') || '';
             var originalText = fn.textContent.trim();
 
-            /* Skip if no note */
-            if (!noteText) return;
+            /* No note — unwrap the span into plain text */
+            if (!noteText) {
+                if (fn.parentNode) {
+                    var plainText = document.createTextNode(originalText);
+                    fn.parentNode.replaceChild(plainText, fn);
+                }
+                return;
+            }
 
             var num = notesList.length + 1;
 
@@ -217,9 +223,11 @@
             /* Replace footnote span with plain text + marker */
             var textNode = document.createTextNode(originalText);
             if (fn.parentNode) {
-                fn.parentNode.insertBefore(textNode, fn);
-                fn.parentNode.insertBefore(marker, fn);
-                fn.parentNode.removeChild(fn);
+                fn.parentNode.replaceChild(textNode, fn);
+                /* Insert marker AFTER text node */
+                if (textNode.parentNode) {
+                    textNode.parentNode.insertBefore(marker, textNode.nextSibling);
+                }
             }
 
             /* Store note */
@@ -273,7 +281,6 @@
        9. MEASURE BLOCKS (for pagination)
        ====================================================================== */
     function measureBlocks(blocks) {
-        /* Create offscreen measuring container matching .chapter-body width */
         var measureDiv = document.createElement('div');
         measureDiv.style.cssText = [
             'position:absolute',
@@ -343,12 +350,10 @@
             currentHeight += blockHeight;
         }
 
-        /* Push remaining */
         if (currentChunk.length > 0) {
             chunks.push(currentChunk);
         }
 
-        /* If no chunks — return single empty */
         if (chunks.length === 0) {
             chunks.push([]);
         }
@@ -362,7 +367,6 @@
     function buildChapterPages(original, index, startPageNum) {
         var allPages = [];
 
-        /* Extract metadata */
         var numEl = original.querySelector('.chapter-num');
         var titleEl = original.querySelector('.chapter-title');
         var yearEl = original.querySelector('.chapter-year');
@@ -371,11 +375,9 @@
         var titleText = titleEl ? titleEl.textContent.trim() : '';
         var yearText = yearEl ? yearEl.textContent.trim() : '';
 
-        /* Extract body */
         var bodyEl = original.querySelector('.chapter-body');
 
         if (!bodyEl) {
-            /* Empty chapter — single page */
             var emptyPage = buildEmptyChapterPage({
                 numText: numText,
                 titleText: titleText,
@@ -386,23 +388,17 @@
             return [emptyPage];
         }
 
-        /* Process footnotes */
         var processed = processFootnotes(bodyEl);
         var cleanBody = processed.cleanBody;
         var notesList = processed.notesList;
 
-        /* Collect blocks (children of cleanBody) */
         var blocks = Array.prototype.slice.call(cleanBody.children);
 
-        /* Measure */
         var measured = measureBlocks(blocks);
 
-        /* Build chapter-end notes section if any */
         var notesSection = buildChapterEndNotes(notesList);
         if (notesSection) {
-            /* Add notes as final block for measurement */
             var notesHeight = 0;
-            /* Measure notes section */
             var measureDiv = document.createElement('div');
             measureDiv.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + CONTENT_WIDTH_MM + 'mm;background:#FBF8F1;box-sizing:border-box;font-family:\'Lora\',Georgia,serif;font-size:11pt;line-height:1.75;padding:0;margin:0;';
             document.body.appendChild(measureDiv);
@@ -410,7 +406,6 @@
             notesHeight = measureDiv.firstChild.offsetHeight;
             document.body.removeChild(measureDiv);
 
-            /* Push notes as a block (will be placed at end) */
             measured.push({
                 node: notesSection,
                 heightPx: notesHeight,
@@ -418,10 +413,8 @@
             });
         }
 
-        /* Paginate */
         var pageChunks = paginateBlocks(measured);
 
-        /* Build each page */
         for (var p = 0; p < pageChunks.length; p++) {
             var isFirstPage = (p === 0);
             var page = buildChapterPage({
@@ -560,10 +553,8 @@
 
                 contentContainer.innerHTML = '';
 
-                /* Front matter pages before chapters = 9 */
                 var startPageNum = FIRST_CHAPTER_PAGE;
 
-                /* Build chapter pages and track starting pages */
                 var chapterStartPages = {};
                 var currentPageNum = startPageNum;
 
