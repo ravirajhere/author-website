@@ -1,8 +1,8 @@
 /* ==========================================================================
-   RAVI RAJ SINGH — EBOOK GENERATOR v4.2
-   v4.1 + drop cap removed + back cover page added
+   RAVI RAJ SINGH — EBOOK GENERATOR v5.0
+   v4.2 + multi-page chapter support (permanent fix)
    Companion: book.html · book.js · book.css
-   Version: 4.2
+   Version: 5.0
    ========================================================================== */
 
 // ============================================================
@@ -31,7 +31,12 @@ const EBOOK_CONFIG = {
         quality: 0.85,
         format: 'a4',
         margin: 15,
-        batchSize: 2
+        batchSize: 2,
+        /* ⭐ Multi-page: how much content height (in mm) fits on one page */
+        /* A4 = 297mm, margin 15mm each side = 267mm usable */
+        usableHeightMm: 267,
+        usableWidthMm: 180,
+        headerSpaceMm: 20  /* running header + top padding */
     }
 };
 
@@ -360,6 +365,8 @@ class EbookGenerator {
         this.isGenerating = false;
         this.cancelled = false;
         this.resources = null;
+        /* ⭐ Map: chapter index → starting page number in final PDF */
+        this.chapterStartPages = {};
     }
 
     async generate(lang, langLabel) {
@@ -368,6 +375,7 @@ class EbookGenerator {
         this.isGenerating = true;
         this.cancelled = false;
         this.currentPage = 0;
+        this.chapterStartPages = {};
 
         const report = function (p, m) { showPdfProgress(p, m || 'Generating PDF'); };
 
@@ -459,13 +467,38 @@ class EbookGenerator {
         add(() => this.pageCopyright());
         add(() => this.pageDedication());
         add(() => this.pageAuthorsNote());
-        add(() => this.pageTOC(content.chapters));
+
+        /* ⭐ TOC: track starting page of each chapter */
+        /* Front matter = 7 pages so far. Page 8 = TOC. */
+        /* Page 9 = How to Read. Chapters start at page 10. */
+        const chapterStartPage = 10;
+        const tocPage = this.pageTOC(content.chapters, chapterStartPage);
+
+        add(() => tocPage);
         add(() => this.pageHowToRead());
 
-        // ---- CHAPTERS ----
-        content.chapters.forEach((ch, i) => {
-            add(() => this.pageChapter(ch, i));
-        });
+        // ---- CHAPTERS (may produce multiple pages each) ----
+        const frontMatterCount = pages.length;
+        let runningPageNum = frontMatterCount + 1;
+
+        for (let i = 0; i < content.chapters.length; i++) {
+            if (this.cancelled) break;
+
+            const chapterPages = await this.pageChapter(
+                content.chapters[i],
+                i,
+                runningPageNum
+            );
+
+            this.chapterStartPages[i] = runningPageNum;
+
+            chapterPages.forEach(function (p) { pages.push(p); });
+            runningPageNum += chapterPages.length;
+        }
+
+        /* ⭐ Re-generate TOC with actual chapter page numbers */
+        const realTOC = this.pageTOC(content.chapters, null, this.chapterStartPages);
+        pages[7] = realTOC; // TOC is at index 7 (8th page)
 
         // ---- BACK MATTER (5 pages) ----
         add(() => this.pageStoryBehind());
@@ -602,10 +635,10 @@ class EbookGenerator {
         return div;
     }
 
-    pageTOC(chapters) {
+    pageTOC(chapters, startPage, chapterStartPages) {
         const div = makePage();
         let rows = '';
-        const basePageNum = 10;
+        const basePageNum = startPage || 10;
 
         chapters.forEach(function (ch, i) {
             const titleEl = ch.querySelector('.chapter-title');
@@ -614,8 +647,10 @@ class EbookGenerator {
             const title = titleEl ? titleEl.textContent.trim() : 'Chapter ' + (i + 1);
             const year  = yearEl ? yearEl.textContent.trim() : '';
 
-            const label = (i === 10) ? 'EPILOGUE' : 'CHAPTER ' + (i + 1);
-            const pg = basePageNum + i;
+            const label = 'CHAPTER ' + (i + 1);
+            const pg = chapterStartPages
+                ? (chapterStartPages[i] || basePageNum + i)
+                : basePageNum + i;
 
             rows +=
                 '<div style="display:flex;align-items:baseline;gap:12px;padding:9px 0;">' +
@@ -650,7 +685,7 @@ class EbookGenerator {
                     'How to Read This Book' +
                 '</h2>' +
                 goldRule(50, true) +
-                para('This is a memoir — a true story of a boy growing up in Begusarai, Bihar. It covers the years 2008 to 2019, across eleven chapters.', { indent: true }) +
+                para('This is a memoir — a true story of a boy growing up in Begusarai, Bihar. It covers the years 2008 to 2026, across eighteen chapters.', { indent: true }) +
                 para('You can read it in order, or begin anywhere. Each chapter is a self-contained memory. The Hinglish edition is available alongside the English.', { indent: true }) +
                 para('The story continues. It is still being written.', { indent: true }) +
                 fleuron(true) +
@@ -662,45 +697,63 @@ class EbookGenerator {
     }
 
     // ========================================================
-    // ⭐ v4.2: Drop cap removed, clean opening paragraph
+    // ⭐ v5.0: MULTI-PAGE CHAPTER SUPPORT
+    // Returns an ARRAY of page elements (may be 1 or more)
     // ========================================================
-    pageChapter(chapterEl, index) {
-        const div = document.createElement('div');
-        div.style.cssText = [
-            'padding:60px 55px 60px 55px',
-            'background:#ffffff',
-            'display:flex',
-            'flex-direction:column',
-            'min-height:100%',
-            'box-sizing:border-box',
-            'position:relative',
-            'font-family:' + S.serifBody
-        ].join(';');
+    async pageChapter(chapterEl, index, startPageNum) {
+        const allPages = [];
 
-        const clone = chapterEl.cloneNode(true);
-
-        clone.querySelectorAll('.chapter-nav, .menu-btn, .back-link, .lang-switch').forEach(function (el) {
-            el.remove();
-        });
-
-        const numEl   = clone.querySelector('.chapter-num');
-        const titleEl = clone.querySelector('.chapter-title');
-        const yearEl  = clone.querySelector('.chapter-year');
+        // ---- 1. Extract metadata ----
+        const numEl   = chapterEl.querySelector('.chapter-num');
+        const titleEl = chapterEl.querySelector('.chapter-title');
+        const yearEl  = chapterEl.querySelector('.chapter-year');
 
         const numText   = numEl ? numEl.textContent.trim() : 'Chapter ' + (index + 1);
         const titleText = titleEl ? titleEl.textContent.trim() : '';
         const yearText  = yearEl ? yearEl.textContent.trim() : '';
 
-        const head = clone.querySelector('.chapter-head');
-        if (head) head.remove();
+        // ---- 2. Extract body ----
+        const bodyEl = chapterEl.querySelector('.chapter-body');
+        if (!bodyEl) {
+            // No body — return single blank page
+            return [this._buildChapterEmptyPage(numText, titleText, yearText, index, startPageNum, titleText)];
+        }
 
-        const rule = clone.querySelector('.chapter-rule');
-        if (rule) rule.remove();
+        // ---- 3. Style paragraphs (same as before) ----
+        const bodyClone = bodyEl.cloneNode(true);
+        this._styleChapterBody(bodyClone);
 
-        const bodyEl = clone.querySelector('.chapter-body') || clone;
+        // ---- 4. Collect block elements (paragraphs, figures, quotes) ----
+        const blocks = Array.prototype.slice.call(bodyClone.children);
 
+        // ---- 5. Measure each block height ----
+        const measured = await this._measureBlocks(blocks);
+
+        // ---- 6. Split blocks across pages ----
+        const pageChunks = this._paginateBlocks(measured);
+
+        // ---- 7. Build each page ----
+        for (let p = 0; p < pageChunks.length; p++) {
+            const isFirstPage = (p === 0);
+            const pageEl = this._buildChapterPage({
+                numText: isFirstPage ? numText : '',
+                titleText: isFirstPage ? titleText : '',
+                yearText: isFirstPage ? yearText : '',
+                displayNum: isFirstPage ? ((index === 10) ? '—' : String(index + 1)) : '',
+                chapterIndex: index,
+                titleText_header: titleText,
+                blocks: pageChunks[p],
+                isFirstPage: isFirstPage,
+                pageNum: startPageNum + p
+            });
+            allPages.push(pageEl);
+        }
+
+        return allPages;
+    }
+
+    _styleChapterBody(bodyEl) {
         const paragraphs = Array.prototype.slice.call(bodyEl.querySelectorAll('p'));
-
         paragraphs.forEach(function (el, i) {
             el.style.color = S.ink;
             el.style.fontFamily = S.serifBody;
@@ -711,7 +764,6 @@ class EbookGenerator {
             el.style.letterSpacing = '0.2px';
             el.style.background = 'transparent';
 
-            // ---- FIRST PARAGRAPH: subtle opening, no drop cap ----
             if (i === 0) {
                 el.style.fontSize = '13.5px';
                 el.style.lineHeight = '1.85';
@@ -790,8 +842,189 @@ class EbookGenerator {
             el.style.borderBottom = 'none';
         });
 
-        const displayNum = (index === 10) ? '—' : String(index + 1);
+        bodyEl.querySelectorAll('.placeholder-text').forEach(function (el) {
+            el.style.fontFamily = S.serifBody;
+            el.style.fontStyle = 'italic';
+            el.style.fontSize = '13px';
+            el.style.color = S.muted;
+            el.style.textAlign = 'center';
+            el.style.padding = '60px 0';
+            el.style.letterSpacing = '0.02em';
+        });
+    }
 
+    async _measureBlocks(blocks) {
+        // Create offscreen measuring container with A4 dimensions
+        const measureDiv = document.createElement('div');
+        measureDiv.style.cssText = [
+            'position:absolute',
+            'left:-99999px',
+            'top:0',
+            'width:180mm',
+            'background:#ffffff',
+            'box-sizing:border-box',
+            'font-family:' + S.serifBody
+        ].join(';');
+        document.body.appendChild(measureDiv);
+
+        const measured = [];
+
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            const clone = block.cloneNode(true);
+            measureDiv.innerHTML = '';
+            measureDiv.appendChild(clone);
+
+            // Wait for images inside
+            const imgs = Array.prototype.slice.call(clone.querySelectorAll('img'));
+            await Promise.all(imgs.map(function (img) {
+                if (img.complete) return Promise.resolve();
+                return new Promise(function (resolve) {
+                    img.onload = img.onerror = function () { resolve(); };
+                });
+            }));
+
+            // Small delay for layout
+            await new Promise(function (r) { requestAnimationFrame(r); });
+
+            const heightPx = clone.offsetHeight;
+            const pxPerMm = 3.7795;
+            const heightMm = heightPx / pxPerMm;
+
+            measured.push({
+                node: block,
+                heightMm: heightMm
+            });
+        }
+
+        document.body.removeChild(measureDiv);
+        return measured;
+    }
+
+    _paginateBlocks(measured) {
+        const usableHeightMm = EBOOK_CONFIG.pdf.usableHeightMm - EBOOK_CONFIG.pdf.headerSpaceMm;
+        const chunks = [];
+        let currentChunk = [];
+        let currentHeight = 0;
+
+        for (let i = 0; i < measured.length; i++) {
+            const item = measured[i];
+            const blockHeight = item.heightMm;
+
+            // If single block is taller than a page — put it alone (better to overflow one than break mid-paragraph)
+            if (blockHeight > usableHeightMm) {
+                if (currentChunk.length > 0) {
+                    chunks.push(currentChunk);
+                    currentChunk = [];
+                    currentHeight = 0;
+                }
+                chunks.push([item.node]);
+                continue;
+            }
+
+            // If adding this block exceeds page height — start new page
+            if (currentHeight + blockHeight > usableHeightMm && currentChunk.length > 0) {
+                chunks.push(currentChunk);
+                currentChunk = [];
+                currentHeight = 0;
+            }
+
+            currentChunk.push(item.node);
+            currentHeight += blockHeight;
+        }
+
+        // Push remaining
+        if (currentChunk.length > 0) {
+            chunks.push(currentChunk);
+        }
+
+        // If no chunks (empty chapter) — return single empty
+        if (chunks.length === 0) {
+            chunks.push([]);
+        }
+
+        return chunks;
+    }
+
+    _buildChapterPage(opts) {
+        const div = document.createElement('div');
+        div.style.cssText = [
+            'padding:60px 55px 60px 55px',
+            'background:#ffffff',
+            'display:flex',
+            'flex-direction:column',
+            'min-height:100%',
+            'box-sizing:border-box',
+            'position:relative',
+            'font-family:' + S.serifBody
+        ].join(';');
+
+        // ---- Running header ----
+        const header = document.createElement('div');
+        header.innerHTML = runningHeader(EBOOK_CONFIG.author, opts.titleText_header || '');
+        div.appendChild(header);
+
+        // ---- Chapter head (only on first page) ----
+        if (opts.isFirstPage) {
+            const headerHTML =
+                '<div style="margin-bottom:30px;">' +
+                    '<div style="display:flex;align-items:center;gap:20px;margin-bottom:16px;">' +
+                        '<div style="flex-shrink:0;width:70px;height:70px;border-radius:50%;background:#F4F1EA;display:flex;align-items:center;justify-content:center;">' +
+                            '<span style="font-family:' + S.serifHead + ';font-size:32px;font-weight:700;color:' + S.ink + ';line-height:1;">' + opts.displayNum + '</span>' +
+                        '</div>' +
+                        '<div style="flex:1;">' +
+                            '<p style="font-family:' + S.serifBody + ';font-size:10px;letter-spacing:3px;text-transform:uppercase;color:' + S.muted + ';margin:0 0 4px 0;">' + opts.numText + '</p>' +
+                            '<h2 style="font-family:' + S.serifHead + ';font-size:22px;font-weight:700;color:#000000;line-height:1.25;letter-spacing:0.3px;margin:0;">' + opts.titleText + '</h2>' +
+                            (opts.yearText ? '<p style="font-family:' + S.serifBody + ';font-style:italic;font-size:11px;color:' + S.muted + ';margin:4px 0 0 0;">' + opts.yearText + '</p>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="width:100%;height:1px;background:' + S.line + ';"></div>' +
+                '</div>';
+
+            const headerWrap = document.createElement('div');
+            headerWrap.innerHTML = headerHTML;
+            div.appendChild(headerWrap);
+        } else {
+            // Continued page — small spacer to match padding
+            const spacer = document.createElement('div');
+            spacer.style.cssText = 'height:20px;';
+            div.appendChild(spacer);
+        }
+
+        // ---- Body ----
+        const bodyWrap = document.createElement('div');
+        opts.blocks.forEach(function (block) {
+            bodyWrap.appendChild(block.cloneNode(true));
+        });
+        div.appendChild(bodyWrap);
+
+        // ---- Page number ----
+        const pageNum = document.createElement('div');
+        pageNum.style.cssText = 'position:absolute;bottom:24px;left:0;right:0;text-align:center;font-family:' + S.serifHead + ';font-size:10px;color:#B0AAA2;letter-spacing:3px;';
+        pageNum.textContent = String(opts.pageNum);
+        div.appendChild(pageNum);
+
+        return div;
+    }
+
+    _buildChapterEmptyPage(numText, titleText, yearText, index, startPageNum, headerTitle) {
+        const div = document.createElement('div');
+        div.style.cssText = [
+            'padding:60px 55px 60px 55px',
+            'background:#ffffff',
+            'display:flex',
+            'flex-direction:column',
+            'min-height:100%',
+            'box-sizing:border-box',
+            'position:relative',
+            'font-family:' + S.serifBody
+        ].join(';');
+
+        const header = document.createElement('div');
+        header.innerHTML = runningHeader(EBOOK_CONFIG.author, headerTitle || '');
+        div.appendChild(header);
+
+        const displayNum = (index === 10) ? '—' : String(index + 1);
         const headerHTML =
             '<div style="margin-bottom:30px;">' +
                 '<div style="display:flex;align-items:center;gap:20px;margin-bottom:16px;">' +
@@ -809,20 +1042,11 @@ class EbookGenerator {
 
         const headerWrap = document.createElement('div');
         headerWrap.innerHTML = headerHTML;
-
-        const bodyWrap = document.createElement('div');
-        while (bodyEl.firstChild) bodyWrap.appendChild(bodyEl.firstChild);
+        div.appendChild(headerWrap);
 
         const pageNum = document.createElement('div');
         pageNum.style.cssText = 'position:absolute;bottom:24px;left:0;right:0;text-align:center;font-family:' + S.serifHead + ';font-size:10px;color:#B0AAA2;letter-spacing:3px;';
-        pageNum.textContent = String(index + 10);
-
-        const header = document.createElement('div');
-        header.innerHTML = runningHeader(EBOOK_CONFIG.author, titleText);
-
-        div.appendChild(header);
-        div.appendChild(headerWrap);
-        div.appendChild(bodyWrap);
+        pageNum.textContent = String(startPageNum);
         div.appendChild(pageNum);
 
         return div;
@@ -1041,6 +1265,7 @@ class EbookGenerator {
         });
         this.pages = [];
         this.pdf = null;
+        this.chapterStartPages = {};
     }
 
     cancel() {
@@ -1120,4 +1345,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-console.log('✅ ebook.js v4.2 loaded — drop cap removed, back cover added');
+console.log('✅ ebook.js v5.0 loaded — multi-page chapter support');
