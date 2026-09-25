@@ -1,4 +1,4 @@
- name: Generate Book PDFs
+name: Generate Book PDFs
 
 on:
   workflow_dispatch:
