@@ -1,6 +1,6 @@
 /* ==========================================================================
    RAVI RAJ SINGH — PRINT STYLESHEET
-   Version: 2.1 — Cream background fix + drop cap scope fix
+   Version: 2.2 — Page-break-inside fix + continued-page drop cap fix
    For: print.html · print.js
    Design: Editorial Book · Playfair Display + Lora · Warm Paper
    ========================================================================== */
@@ -639,6 +639,17 @@ img {
     break-after: auto;
 }
 
+/* ---------- Page break behavior (prevent mid-paragraph splits) ---------- */
+@media print {
+    .chapter-body p,
+    .chapter-body figure,
+    .chapter-body .pull-quote,
+    .chapter-body .chapter-photo {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+
 /* ---------- RUNNING HEADER (flow, not absolute) ---------- */
 .chapter-running-header {
     display: flex;
@@ -742,6 +753,27 @@ img {
     margin: 0.08em 0.08em 0 0;
     color: var(--gold);
     text-indent: 0;
+}
+
+/* ---------- CONTINUED PAGES (page 2+) — no drop cap ---------- */
+.chapter-body-continued > p:first-of-type::first-letter,
+.chapter-body-continued > p:first-child::first-letter {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    float: none !important;
+    color: inherit !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+    font-family: inherit !important;
+}
+
+.chapter-body-continued > p:first-of-type,
+.chapter-body-continued > p:first-child {
+    font-size: 11pt;
+    line-height: 1.75;
+    color: var(--ink);
+    text-indent: 1.5em;
+    margin-bottom: 0;
 }
 
 /* No drop cap in notes section */
