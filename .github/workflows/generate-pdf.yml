@@ -1,0 +1,66 @@
+name: Generate Book PDFs
+
+on:
+  # Manual trigger from GitHub UI
+  workflow_dispatch:
+  
+  # Auto-trigger when book.html or print files change
+  push:
+    branches: [main]
+    paths:
+      - 'book.html'
+      - 'print.html'
+      - 'css/print.css'
+      - 'js/print.js'
+      - 'assets/images/**'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium for Puppeteer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Setup local HTTP server
+        run: |
+          npx --yes http-server . -p 8080 -s &
+          sleep 3
+          curl -s -I http://localhost:8080/print.html | head -1
+
+      - name: Generate PDFs
+        run: npm run generate-pdf
+        env:
+          PRINT_URL: http://localhost:8080
+
+      - name: Commit PDFs back to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/pdfs/
+          git diff --staged --quiet || git commit -m "chore: auto-generate book PDFs [skip ci]"
+          git push
+
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-pdfs
+          path: assets/pdfs/*.pdf
+          retention-days: 90
