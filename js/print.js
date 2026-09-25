@@ -1,17 +1,17 @@
 /* ==========================================================================
-   RAVI RAJ SINGH — PRINT SCRIPT v4.0
-   Multi-page chapter support · 18 chapters · TOC with real page numbers
-   Companion: print.html · print.css · ebook.js
+   RAVI RAJ SINGH — PRINT SCRIPT
+   Version: 5.0 — Vintage old book + Footnotes + Multi-page + Dynamic sizing
+   Companion: print.html · print.css · book.html
    ========================================================================== */
 
 (function () {
     'use strict';
 
-    console.log('[print] v4.0 starting');
+    console.log('[print] v5.0 starting');
 
-    // ============================================================
-    // 1. CONFIG
-    // ============================================================
+    /* ======================================================================
+       1. CONFIG
+       ====================================================================== */
     var LANG = 'en';
     try {
         var params = new URLSearchParams(window.location.search);
@@ -19,23 +19,38 @@
         if (l === 'hi') LANG = 'hi';
     } catch (e) {}
 
+    /* Set HTML lang attribute */
+    try {
+        document.documentElement.lang = LANG === 'hi' ? 'hi' : 'en';
+    } catch (e) {}
+
     var CHAPTERS_ID = LANG === 'hi' ? 'chaptersHi' : 'chaptersEn';
     var FIRST_CHAPTER_PAGE = 10;
     var TOTAL_CHAPTERS = 18;
 
-    /* Page height budget (in px, since we measure DOM) */
-    /* A4 page: 297mm - 20mm top - 20mm bottom = 257mm usable */
-    /* 1mm = 3.7795px → 257mm = ~971px */
-    /* But we have padding inside .chapter (20mm), so usable content = ~217mm = ~820px */
-    var USABLE_CONTENT_PX = 820;
+    /* Page geometry — derived from print.css values */
+    var PAGE_WIDTH_MM = 210;
+    var PAGE_HEIGHT_MM = 297;
+    var PAGE_MARGIN_MM = 20;           /* matches --page-margin in print.css */
+    var RUNNING_HEADER_MM = 14;        /* running header + padding */
+    var MM_TO_PX = 3.7795;             /* 1mm = 3.7795px at 96dpi */
 
-    // ============================================================
-    // 2. IMMEDIATE UI FEEDBACK
-    // ============================================================
+    /* Usable content width inside .chapter (after padding) */
+    var CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);  /* = 170mm */
+    var CONTENT_WIDTH_PX = Math.round(CONTENT_WIDTH_MM * MM_TO_PX);
+
+    /* Usable content height per page (for measurement) */
+    /* .chapter height = 297mm, padding top/bottom = 40mm, running header ~14mm */
+    /* Total usable = 297 - 40 - 14 = 243mm */
+    var USABLE_CONTENT_PX = Math.round(243 * MM_TO_PX);  /* = ~919px */
+
+    /* ======================================================================
+       2. IMMEDIATE UI FEEDBACK
+       ====================================================================== */
     function setStatus(msg) {
         var loadingEl = document.getElementById('loading');
         if (loadingEl) {
-            loadingEl.innerHTML = '<p style="font-family:system-ui;color:#7A7068;font-size:13px;">' + msg + '</p>';
+            loadingEl.innerHTML = '<p style="font-family:system-ui;color:#6F6558;font-size:13px;">' + msg + '</p>';
         }
         console.log('[print] status:', msg);
     }
@@ -66,16 +81,16 @@
             loadingEl.innerHTML =
                 '<div style="max-width:500px;margin:40px auto;padding:20px;font-family:system-ui;">' +
                     '<h2 style="color:#B91C1C;font-size:16px;margin:0 0 8px;">Error</h2>' +
-                    '<pre style="background:#F4F1EA;padding:12px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-word;">' +
+                    '<pre style="background:#F5F0E5;padding:12px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-word;">' +
                         String(msg).replace(/</g, '&lt;') +
                     '</pre>' +
                 '</div>';
         }
     }
 
-    // ============================================================
-    // 3. FETCH WITH TIMEOUT
-    // ============================================================
+    /* ======================================================================
+       3. FETCH WITH TIMEOUT
+       ====================================================================== */
     function fetchTimeout(url, ms) {
         return new Promise(function (resolve, reject) {
             var controller = new AbortController();
@@ -96,9 +111,9 @@
         });
     }
 
-    // ============================================================
-    // 4. FETCH book.html
-    // ============================================================
+    /* ======================================================================
+       4. FETCH book.html
+       ====================================================================== */
     function fetchBook() {
         var urls = ['/book.html', '/book', 'book.html'];
         var errors = [];
@@ -140,9 +155,9 @@
         return tryNext(0);
     }
 
-    // ============================================================
-    // 5. EXTRACT CHAPTERS
-    // ============================================================
+    /* ======================================================================
+       5. EXTRACT CHAPTERS
+       ====================================================================== */
     function extractChapters(html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var container = doc.querySelector('#' + CHAPTERS_ID);
@@ -163,9 +178,9 @@
         return chapters;
     }
 
-    // ============================================================
-    // 6. ESCAPE HTML
-    // ============================================================
+    /* ======================================================================
+       6. ESCAPE HTML
+       ====================================================================== */
     function esc(str) {
         return String(str)
             .replace(/&/g, '&amp;')
@@ -174,20 +189,102 @@
             .replace(/"/g, '&quot;');
     }
 
-    // ============================================================
-    // 7. MEASURE BLOCKS (for pagination)
-    // ============================================================
+    /* ======================================================================
+       7. FOOTNOTE PROCESSING
+       Extracts footnotes from a chapter body, replaces <span class="footnote">
+       with superscript markers, returns { cleanBody, notesList }
+       ====================================================================== */
+    function processFootnotes(bodyEl) {
+        var clone = bodyEl.cloneNode(true);
+        var footnotes = Array.prototype.slice.call(clone.querySelectorAll('.footnote'));
+        var notesList = [];
+
+        footnotes.forEach(function (fn, idx) {
+            var noteText = fn.getAttribute('data-note') || '';
+            var originalText = fn.textContent.trim();
+
+            /* Skip if no note */
+            if (!noteText) return;
+
+            var num = notesList.length + 1;
+
+            /* Build superscript marker */
+            var marker = document.createElement('sup');
+            marker.className = 'footnote-marker';
+            marker.textContent = num;
+            marker.setAttribute('aria-label', 'Footnote ' + num);
+
+            /* Replace footnote span with plain text + marker */
+            var textNode = document.createTextNode(originalText);
+            if (fn.parentNode) {
+                fn.parentNode.insertBefore(textNode, fn);
+                fn.parentNode.insertBefore(marker, fn);
+                fn.parentNode.removeChild(fn);
+            }
+
+            /* Store note */
+            notesList.push({
+                num: num,
+                text: noteText
+            });
+        });
+
+        return { cleanBody: clone, notesList: notesList };
+    }
+
+    /* ======================================================================
+       8. BUILD CHAPTER-END NOTES
+       ====================================================================== */
+    function buildChapterEndNotes(notesList) {
+        if (!notesList || notesList.length === 0) return null;
+
+        var section = document.createElement('section');
+        section.className = 'chapter-notes';
+
+        var heading = document.createElement('p');
+        heading.className = 'chapter-notes-heading';
+        heading.textContent = 'Notes';
+        section.appendChild(heading);
+
+        var list = document.createElement('ol');
+        list.className = 'chapter-notes-list';
+
+        notesList.forEach(function (note) {
+            var li = document.createElement('li');
+
+            var numSpan = document.createElement('span');
+            numSpan.className = 'chapter-notes-num';
+            numSpan.textContent = note.num;
+
+            var textSpan = document.createElement('span');
+            textSpan.className = 'chapter-notes-text';
+            textSpan.textContent = note.text;
+
+            li.appendChild(numSpan);
+            li.appendChild(textSpan);
+            list.appendChild(li);
+        });
+
+        section.appendChild(list);
+        return section;
+    }
+
+    /* ======================================================================
+       9. MEASURE BLOCKS (for pagination)
+       ====================================================================== */
     function measureBlocks(blocks) {
-        // Create offscreen measuring container matching .chapter-body width
+        /* Create offscreen measuring container matching .chapter-body width */
         var measureDiv = document.createElement('div');
         measureDiv.style.cssText = [
             'position:absolute',
             'left:-99999px',
             'top:0',
-            'width:170mm',
-            'background:#ffffff',
+            'width:' + CONTENT_WIDTH_MM + 'mm',
+            'background:#FBF8F1',
             'box-sizing:border-box',
             'font-family:\'Lora\', Georgia, serif',
+            'font-size:11pt',
+            'line-height:1.75',
             'padding:0',
             'margin:0'
         ].join(';');
@@ -212,9 +309,9 @@
         return measured;
     }
 
-    // ============================================================
-    // 8. PAGINATE BLOCKS
-    // ============================================================
+    /* ======================================================================
+       10. PAGINATE BLOCKS
+       ====================================================================== */
     function paginateBlocks(measured) {
         var chunks = [];
         var currentChunk = [];
@@ -224,7 +321,7 @@
             var item = measured[i];
             var blockHeight = item.heightPx;
 
-            // If single block taller than a page — put it alone
+            /* If single block taller than a page — put it alone */
             if (blockHeight > USABLE_CONTENT_PX) {
                 if (currentChunk.length > 0) {
                     chunks.push(currentChunk);
@@ -235,7 +332,7 @@
                 continue;
             }
 
-            // If adding this block exceeds page height — start new page
+            /* If adding this block exceeds page height — start new page */
             if (currentHeight + blockHeight > USABLE_CONTENT_PX && currentChunk.length > 0) {
                 chunks.push(currentChunk);
                 currentChunk = [];
@@ -246,12 +343,12 @@
             currentHeight += blockHeight;
         }
 
-        // Push remaining
+        /* Push remaining */
         if (currentChunk.length > 0) {
             chunks.push(currentChunk);
         }
 
-        // If no chunks — return single empty
+        /* If no chunks — return single empty */
         if (chunks.length === 0) {
             chunks.push([]);
         }
@@ -259,13 +356,13 @@
         return chunks;
     }
 
-    // ============================================================
-    // 9. BUILD CHAPTER PAGES (multi-page)
-    // ============================================================
+    /* ======================================================================
+       11. BUILD CHAPTER PAGES (multi-page)
+       ====================================================================== */
     function buildChapterPages(original, index, startPageNum) {
         var allPages = [];
 
-        // Extract metadata
+        /* Extract metadata */
         var numEl = original.querySelector('.chapter-num');
         var titleEl = original.querySelector('.chapter-title');
         var yearEl = original.querySelector('.chapter-year');
@@ -274,11 +371,11 @@
         var titleText = titleEl ? titleEl.textContent.trim() : '';
         var yearText = yearEl ? yearEl.textContent.trim() : '';
 
-        // Extract body
+        /* Extract body */
         var bodyEl = original.querySelector('.chapter-body');
 
         if (!bodyEl) {
-            // Empty chapter — single page
+            /* Empty chapter — single page */
             var emptyPage = buildEmptyChapterPage({
                 numText: numText,
                 titleText: titleText,
@@ -289,17 +386,42 @@
             return [emptyPage];
         }
 
-        // Collect blocks
-        var bodyClone = bodyEl.cloneNode(true);
-        var blocks = Array.prototype.slice.call(bodyClone.children);
+        /* Process footnotes */
+        var processed = processFootnotes(bodyEl);
+        var cleanBody = processed.cleanBody;
+        var notesList = processed.notesList;
 
-        // Measure
+        /* Collect blocks (children of cleanBody) */
+        var blocks = Array.prototype.slice.call(cleanBody.children);
+
+        /* Measure */
         var measured = measureBlocks(blocks);
 
-        // Paginate
+        /* Build chapter-end notes section if any */
+        var notesSection = buildChapterEndNotes(notesList);
+        if (notesSection) {
+            /* Add notes as final block for measurement */
+            var notesHeight = 0;
+            /* Measure notes section */
+            var measureDiv = document.createElement('div');
+            measureDiv.style.cssText = 'position:absolute;left:-99999px;top:0;width:' + CONTENT_WIDTH_MM + 'mm;background:#FBF8F1;box-sizing:border-box;font-family:\'Lora\',Georgia,serif;font-size:11pt;line-height:1.75;padding:0;margin:0;';
+            document.body.appendChild(measureDiv);
+            measureDiv.appendChild(notesSection.cloneNode(true));
+            notesHeight = measureDiv.firstChild.offsetHeight;
+            document.body.removeChild(measureDiv);
+
+            /* Push notes as a block (will be placed at end) */
+            measured.push({
+                node: notesSection,
+                heightPx: notesHeight,
+                isNotes: true
+            });
+        }
+
+        /* Paginate */
         var pageChunks = paginateBlocks(measured);
 
-        // Build each page
+        /* Build each page */
         for (var p = 0; p < pageChunks.length; p++) {
             var isFirstPage = (p === 0);
             var page = buildChapterPage({
@@ -324,32 +446,25 @@
         page.className = 'chapter';
         page.id = 'pdf-chapter-' + (opts.index + 1) + (opts.isFirstPage ? '' : '-p' + opts.pageNum);
 
-        // Running header
+        /* Running header */
         var runningHeader = document.createElement('div');
         runningHeader.className = 'chapter-running-header';
         runningHeader.innerHTML = '<span>Ravi Raj Singh</span><span>' + esc(opts.titleTextHeader) + '</span>';
         page.appendChild(runningHeader);
 
-        // Chapter header (only first page)
+        /* Chapter header (only first page) — centered, no circle */
         if (opts.isFirstPage) {
             var headerBlock = document.createElement('div');
             headerBlock.className = 'chapter-header';
             headerBlock.innerHTML =
-                '<div class="chapter-number-circle"><span>' + esc(opts.displayNum) + '</span></div>' +
-                '<div class="chapter-header-text">' +
-                    '<p class="chapter-number">' + esc(opts.numText) + '</p>' +
-                    '<h2 class="chapter-title">' + esc(opts.titleText) + '</h2>' +
-                    (opts.yearText ? '<p class="chapter-year">' + esc(opts.yearText) + '</p>' : '') +
-                '</div>';
+                '<p class="chapter-number">' + esc(opts.numText) + '</p>' +
+                '<h2 class="chapter-title">' + esc(opts.titleText) + '</h2>' +
+                (opts.yearText ? '<p class="chapter-year">' + esc(opts.yearText) + '</p>' : '') +
+                '<div class="rule-ornamented" aria-hidden="true"></div>';
             page.appendChild(headerBlock);
-        } else {
-            // Spacer for continued pages
-            var spacer = document.createElement('div');
-            spacer.style.cssText = 'height:20px;';
-            page.appendChild(spacer);
         }
 
-        // Body
+        /* Body */
         var bodyWrapper = document.createElement('div');
         bodyWrapper.className = 'chapter-body';
         for (var i = 0; i < opts.blocks.length; i++) {
@@ -357,7 +472,7 @@
         }
         page.appendChild(bodyWrapper);
 
-        // Page number
+        /* Page number */
         var pageNum = document.createElement('div');
         pageNum.className = 'chapter-page-number';
         pageNum.textContent = String(opts.pageNum);
@@ -376,16 +491,13 @@
         runningHeader.innerHTML = '<span>Ravi Raj Singh</span><span>' + esc(opts.titleText) + '</span>';
         page.appendChild(runningHeader);
 
-        var displayNum = (opts.index === 10) ? '—' : String(opts.index + 1);
         var headerBlock = document.createElement('div');
         headerBlock.className = 'chapter-header';
         headerBlock.innerHTML =
-            '<div class="chapter-number-circle"><span>' + displayNum + '</span></div>' +
-            '<div class="chapter-header-text">' +
-                '<p class="chapter-number">' + esc(opts.numText) + '</p>' +
-                '<h2 class="chapter-title">' + esc(opts.titleText) + '</h2>' +
-                (opts.yearText ? '<p class="chapter-year">' + esc(opts.yearText) + '</p>' : '') +
-            '</div>';
+            '<p class="chapter-number">' + esc(opts.numText) + '</p>' +
+            '<h2 class="chapter-title">' + esc(opts.titleText) + '</h2>' +
+            (opts.yearText ? '<p class="chapter-year">' + esc(opts.yearText) + '</p>' : '') +
+            '<div class="rule-ornamented" aria-hidden="true"></div>';
         page.appendChild(headerBlock);
 
         var pageNum = document.createElement('div');
@@ -396,9 +508,9 @@
         return page;
     }
 
-    // ============================================================
-    // 10. BUILD TOC
-    // ============================================================
+    /* ======================================================================
+       12. BUILD TOC
+       ====================================================================== */
     function buildTOC(chapters, chapterStartPages) {
         var tocList = document.getElementById('toc-list');
         if (!tocList) return;
@@ -427,9 +539,9 @@
         console.log('[print] TOC built');
     }
 
-    // ============================================================
-    // 11. MAIN
-    // ============================================================
+    /* ======================================================================
+       13. MAIN
+       ====================================================================== */
     function run() {
         console.log('[print] run() called, lang:', LANG);
 
@@ -448,11 +560,10 @@
 
                 contentContainer.innerHTML = '';
 
-                // Front matter pages before chapters = 9 (cover, half-title, frontispiece,
-                // title, copyright, dedication, note, TOC, how-to-read)
+                /* Front matter pages before chapters = 9 */
                 var startPageNum = FIRST_CHAPTER_PAGE;
 
-                // Build chapter pages and track starting pages
+                /* Build chapter pages and track starting pages */
                 var chapterStartPages = {};
                 var currentPageNum = startPageNum;
 
@@ -481,9 +592,9 @@
             });
     }
 
-    // ============================================================
-    // 12. INIT
-    // ============================================================
+    /* ======================================================================
+       14. INIT
+       ====================================================================== */
     function init() {
         console.log('[print] init, readyState:', document.readyState);
         try {
@@ -500,7 +611,7 @@
         init();
     }
 
-    // Final safety net: after 15 seconds, force reveal
+    /* Final safety net: after 15 seconds, force reveal */
     setTimeout(function () {
         var rootEl = document.getElementById('book-root');
         if (rootEl && rootEl.hidden) {
