@@ -1,0 +1,40 @@
+<header class="site-header" id="siteHeader">
+    <div class="header-inner">
+        <a href="/" class="brand" aria-label="{{author.name}} — Home">
+            <span class="brand-text">
+                <strong>{{author.name}}</strong>
+                <em>Author</em>
+            </span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Primary">
+            <a href="/" {{#isHome}}class="is-active"{{/isHome}}>Home</a>
+            <a href="/book" {{#isBook}}class="is-active"{{/isBook}}>Book</a>
+            <a href="/journal" {{#isJournal}}class="is-active"{{/isJournal}}>Journal</a>
+            <a href="/now" {{#isNow}}class="is-active"{{/isNow}}>Now</a>
+            <a href="/about" {{#isAbout}}class="is-active"{{/isAbout}}>About</a>
+        </nav>
+
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav" type="button">
+            <span class="menu-lines" aria-hidden="true"><span></span><span></span></span>
+            <span class="menu-label">Menu</span>
+        </button>
+    </div>
+
+    <!-- Mobile nav -->
+    <div class="mobile-overlay" id="mobileOverlay" hidden aria-hidden="true"></div>
+    <nav class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Mobile navigation" hidden aria-hidden="true">
+        <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu" type="button">✕</button>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/book">Book</a></li>
+            <li><a href="/journal">Journal</a></li>
+            <li><a href="/now">Now</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+        <div class="mobile-nav-foot">
+            <p>{{author.location}}</p>
+            <p>{{author.email}}</p>
+        </div>
+    </nav>
+</header>
