@@ -3,8 +3,8 @@
 
   "git": {
     "deploymentEnabled": {
-      "main": false,
-      "preview": false
+      "main": true,
+      "preview": true
     }
   },
 
@@ -31,15 +31,27 @@
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }
       ]
+    },
+    {
+      "source": "/(.*)\\.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
     }
   ],
 
   "rewrites": [
-    { "source": "/book", "destination": "/book.html" },
-    { "source": "/journal", "destination": "/journal.html" },
-    { "source": "/letters", "destination": "/letters.html" },
-    { "source": "/now", "destination": "/now.html" },
-    { "source": "/about", "destination": "/about.html" }
+    { "source": "/book",     "destination": "/book.html" },
+    { "source": "/journal",  "destination": "/journal.html" },
+    { "source": "/now",      "destination": "/now.html" },
+    { "source": "/about",    "destination": "/about.html" },
+    { "source": "/print",    "destination": "/print.html" }
   ],
 
   "functions": {
