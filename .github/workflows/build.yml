@@ -11,6 +11,7 @@ on:
       - 'js/**'
       - 'scripts/**'
       - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 
 jobs:
