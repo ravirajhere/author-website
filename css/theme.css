@@ -1,0 +1,224 @@
+/* ═══════════════════════════════════════════════════════════════════
+   THE UNFINISHED STORY — THEME TOKENS
+   All design decisions live here. Nothing else hardcodes colors.
+   Change 5 colors → whole site restyles.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ─── CORE PALETTE — 5 colors control everything ─── */
+    --c-primary:    #1F1A14;   /* ink — main text */
+    --c-base:       #FBF8F1;   /* paper — background */
+    --c-surface:    #F5F0E5;   /* cards, subtle sections */
+    --c-accent:     #8B6F3F;   /* gold — links, emphasis */
+    --c-warn:       #A64B2A;   /* ember — accents, warnings */
+
+    /* ─── DERIVED COLORS (auto-computed) ─── */
+    --c-text:         var(--c-primary);
+    --c-text-soft:    color-mix(in srgb, var(--c-primary) 82%, var(--c-base));
+    --c-text-muted:   color-mix(in srgb, var(--c-primary) 55%, var(--c-base));
+    --c-border:       color-mix(in srgb, var(--c-primary) 12%, transparent);
+    --c-border-soft:  color-mix(in srgb, var(--c-primary) 6%, transparent);
+    --c-border-strong: color-mix(in srgb, var(--c-primary) 22%, transparent);
+    --c-accent-soft:  color-mix(in srgb, var(--c-accent) 10%, transparent);
+
+    /* ─── FONTS ─── */
+    --f-display: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+    --f-body:    'Lora', 'Georgia', 'Times New Roman', serif;
+    --f-mono:    'Inter', system-ui, -apple-system, sans-serif;
+
+    /* ─── TYPE SCALE ─── */
+    --fs-xs:   0.75rem;
+    --fs-sm:   0.875rem;
+    --fs-base: 1rem;
+    --fs-md:   1.0625rem;
+    --fs-lg:   1.1875rem;
+    --fs-xl:   1.375rem;
+    --fs-2xl:  1.75rem;
+    --fs-3xl:  2.25rem;
+    --fs-4xl:  clamp(2rem, 4.5vw, 3rem);
+    --fs-5xl:  clamp(2.5rem, 6vw, 4rem);
+
+    /* ─── SPACING ─── */
+    --sp-1:  0.25rem;  --sp-2:  0.5rem;   --sp-3:  0.75rem;
+    --sp-4:  1rem;     --sp-5:  1.25rem;  --sp-6:  1.5rem;
+    --sp-8:  2rem;     --sp-10: 2.5rem;   --sp-12: 3rem;
+    --sp-16: 4rem;     --sp-20: 5rem;     --sp-24: 6rem;
+
+    /* ─── LAYOUT ─── */
+    --max-width:   1180px;
+    --reading-max: 66ch;
+    --header-h:    64px;
+    --sidebar-w:   280px;
+
+    /* ─── RADII ─── */
+    --r-sm:   1px;
+    --r-md:   2px;
+    --r-lg:   4px;
+    --r-full: 999px;
+
+    /* ─── MOTION ─── */
+    --ease:     cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --t-fast:   150ms;
+    --t-base:   250ms;
+    --t-slow:   500ms;
+
+    /* ─── SHADOWS ─── */
+    --shadow-soft: 0 1px 2px color-mix(in srgb, var(--c-primary) 4%, transparent);
+    --shadow-book: 0 4px 12px color-mix(in srgb, var(--c-primary) 8%, transparent),
+                   0 20px 45px color-mix(in srgb, var(--c-primary) 12%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THEME PRESETS — activate with <html data-theme="dark">
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    --c-primary: #E8E4DD;
+    --c-base:    #1A1714;
+    --c-surface: #262220;
+    --c-accent:  #C9A961;
+    --c-warn:    #D97757;
+}
+
+[data-theme="sepia"] {
+    --c-primary: #3D2E1F;
+    --c-base:    #F4ECD8;
+    --c-surface: #E8DCC0;
+    --c-accent:  #8B5A2B;
+    --c-warn:    #A0522D;
+}
+
+[data-theme="contrast"] {
+    --c-primary: #000000;
+    --c-base:    #FFFFFF;
+    --c-surface: #F0F0F0;
+    --c-accent:  #0000CC;
+    --c-warn:    #CC0000;
+}
+
+[data-theme="indigo"] {
+    --c-primary: #1A1A2E;
+    --c-base:    #F5F3FF;
+    --c-surface: #EBE5FF;
+    --c-accent:  #4F46E5;
+    --c-warn:    #DC2626;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE RESET
+   ═══════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+[hidden] { display: none !important; }
+
+html {
+    scroll-padding-top: calc(var(--header-h) + 24px);
+    -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html:focus-within { scroll-behavior: smooth; }
+}
+
+body {
+    font-family: var(--f-body);
+    font-size: var(--fs-md);
+    line-height: 1.85;
+    color: var(--c-text);
+    background: var(--c-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background var(--t-base) var(--ease),
+                color var(--t-base) var(--ease);
+}
+
+img, svg { display: block; max-width: 100%; height: auto; }
+
+a { color: inherit; text-decoration: none; transition: color var(--t-fast) var(--ease); }
+
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+em { font-style: italic; }
+
+::selection {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    background: var(--c-primary);
+    color: var(--c-base);
+    padding: 10px 18px;
+    border-radius: var(--r-md);
+    font-family: var(--f-mono);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    z-index: 10000;
+    transition: top var(--t-fast) var(--ease);
+}
+
+.skip-link:focus { top: 16px; }
+
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--c-surface); }
+::-webkit-scrollbar-thumb {
+    background: var(--c-border-strong);
+    border-radius: var(--r-full);
+    border: 2px solid var(--c-surface);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--c-text-muted); }
