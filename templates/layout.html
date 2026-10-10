@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{page.lang}}" data-theme="light">
+<head>
+    {{head}}
+</head>
+<body class="page-{{page.type}}">
+
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    {{nav}}
+
+    <main id="main" tabindex="-1" class="reading-main">
+        {{content}}
+    </main>
+
+    {{footer}}
+
+    <script src="/js/core.js" defer></script>
+    {{page.scripts}}
+
+</body>
+</html>
