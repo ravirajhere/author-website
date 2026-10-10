@@ -1,0 +1,101 @@
+{
+  "site": {
+    "title": "The Unfinished Story",
+    "url": "https://ravirajhere-author.vercel.app",
+    "language": "en-IN",
+    "description": "The autobiography of Ravi Raj Singh — a living document.",
+    "edition": "2026"
+  },
+
+  "author": {
+    "name": "Ravi Raj Singh",
+    "penName": null,
+    "pronouns": "he/him",
+    "location": "Patna, India",
+    "birthplace": "Bandwar, Begusarai, Bihar",
+    "birthYear": 2008,
+    "email": "raviraj2k09@gmail.com",
+    "bio": "Writer based in Patna, India. Author of 'A Boy Who Never Thought' — an autobiography in progress.",
+    "portrait": {
+      "primary": "portrait-author-primary.jpg",
+      "candid": "portrait-author-candid.jpg",
+      "signature": "signature-official.png"
+    }
+  },
+
+  "book": {
+    "title": "A Boy Who Never Thought",
+    "subtitle": "Safar Se Safar Tak",
+    "titleHi": "गुंजते सन्नाटे",
+    "chaptersWritten": 11,
+    "chaptersPlanned": 18,
+    "periodCovered": "2008–2019",
+    "periodFull": "2008–2026",
+    "status": "In progress",
+    "startedYear": 2024,
+    "languages": ["English", "Hinglish"],
+    "genre": "Autobiography / Memoir",
+    "access": "Free to read",
+    "covers": {
+      "front": "cover-front.jpg",
+      "back": "cover-back.jpg"
+    },
+    "epigraph": {
+      "text": "There is no greater agony than bearing an untold story inside you.",
+      "attribution": "Maya Angelou"
+    },
+    "dedication": [
+      "To Mummy — who chose R over N.",
+      "To Papa — who came running from the field.",
+      "To Dadi — who I never got to know.",
+      "And to the boy who never thought."
+    ],
+    "preface": "You can read this book in order. Or not. Some chapters will hurt. Some will comfort. Some will do both. Take your time. This story is still being written."
+  },
+
+  "journal": {
+    "startDate": "2026-03-28",
+    "startContext": "After 12th exams, in the result waiting phase.",
+    "frequency": "Weekly",
+    "languages": ["English", "Hinglish"]
+  },
+
+  "current": {
+    "mood": "😐",
+    "reading": "The Remains of the Day — Kazuo Ishiguro",
+    "workingOn": "Chapter 12 — The Locked Year",
+    "location": "Patna, India",
+    "weather": null,
+    "listeningTo": null,
+    "lastUpdated": "2026-04-01"
+  },
+
+  "brand": {
+    "colors": {
+      "primary": "#1F1A14",
+      "base": "#FBF8F1",
+      "surface": "#F5F0E5",
+      "accent": "#8B6F3F",
+      "warn": "#A64B2A"
+    },
+    "fonts": {
+      "display": "Playfair Display",
+      "body": "Lora",
+      "mono": "Inter"
+    }
+  },
+
+  "social": {
+    "github": "https://github.com/ravirajhere",
+    "linkedin": "https://linkedin.com/in/Ravirajhere",
+    "portfolio": "https://ravirajhere.vercel.app"
+  },
+
+  "features": {
+    "search": true,
+    "pwa": true,
+    "analytics": false,
+    "comments": false,
+    "newsletter": true
+  }
+}
