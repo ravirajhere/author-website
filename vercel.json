@@ -1,10 +1,51 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "preview": false
+    }
+  },
+
+  "cleanUrls": true,
+  "trailingSlash": false,
+
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/assets/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/assets/pdfs/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }
+      ]
+    }
+  ],
+
+  "rewrites": [
+    { "source": "/book", "destination": "/book.html" },
+    { "source": "/journal", "destination": "/journal.html" },
+    { "source": "/letters", "destination": "/letters.html" },
+    { "source": "/now", "destination": "/now.html" },
+    { "source": "/about", "destination": "/about.html" }
+  ],
+
   "functions": {
     "api/subscribe.js": {
-      "maxDuration": 30
-    },
-    "api/book-pdf.js": {
-      "maxDuration": 300
+      "maxDuration": 10,
+      "memory": 512
     }
   }
 }
