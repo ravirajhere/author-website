@@ -15,12 +15,7 @@
 </head>
 <body>
 
-    <div id="loading" class="loading">
-        <p class="loading-quote">"This story is still being written."</p>
-        <p class="loading-status">Preparing your book…</p>
-    </div>
-
-    <main id="book-root" class="book-root" hidden>
+    <main id="book-root" class="book-root">
 
         <!-- ═══ FRONT MATTER ═══ -->
         <section class="page page-cover">
@@ -84,7 +79,7 @@
             <ol class="toc-list" id="toc-list"></ol>
         </section>
 
-        <!-- ═══ CHAPTERS (pre-rendered) ═══ -->
+        <!-- ═══ CHAPTERS (pre-rendered by build) ═══ -->
         <div id="book-content" class="book-content">
             {{chapters}}
         </div>
