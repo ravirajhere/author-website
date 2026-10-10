@@ -1,9 +1,13 @@
 {
-  "name": "ravirajhere-author",
+  "name": "autobiography",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
+    "build": "node scripts/build.cjs",
+    "dev": "node scripts/build-watch.cjs",
+    "serve": "node scripts/build.cjs && npx serve dist",
+    "rename-images": "bash scripts/rename-images.sh",
     "generate-pdf": "node scripts/generate-pdf.cjs"
   },
   "dependencies": {
@@ -12,6 +16,8 @@
     "@supabase/supabase-js": "^2.45.0"
   },
   "devDependencies": {
+    "markdown-it": "^14.1.0",
+    "markdown-it-footnote": "^4.0.0",
     "puppeteer": "^23.11.1"
   }
 }
