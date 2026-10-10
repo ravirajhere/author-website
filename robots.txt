@@ -1,7 +1,8 @@
+# The Unfinished Story — Robots
+# https://ravirajhere-author.vercel.app
+
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /print.html
-Disallow: /404.html
+Disallow: /offline.html
 
 Sitemap: https://ravirajhere-author.vercel.app/sitemap.xml
