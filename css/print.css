@@ -1,6 +1,6 @@
 /* ==========================================================================
-   RAVI RAJ SINGH — PRINT STYLESHEET
-   Version: 2.2 — Page-break-inside fix + continued-page drop cap fix
+   THE UNFINISHED STORY — PRINT STYLESHEET
+   Version: 3.0 — Loading screen + Book epigraph + Build-time chapters
    For: print.html · print.js
    Design: Editorial Book · Playfair Display + Lora · Warm Paper
    ========================================================================== */
@@ -65,10 +65,24 @@ img {
     }
 
     .loading {
+        min-height: 100vh;
+        display: grid;
+        place-content: center;
         text-align: center;
-        padding: 80px 20px;
+        padding: 4rem 2rem;
+    }
+
+    .loading-quote {
         font-family: var(--font-display);
+        font-style: italic;
         font-size: 18px;
+        color: var(--gold);
+        margin-bottom: 1rem;
+    }
+
+    .loading-status {
+        font-family: var(--font-body);
+        font-size: 14px;
         color: var(--muted);
     }
 
@@ -114,6 +128,24 @@ img {
         height: 100%;
         min-height: var(--page-height);
         object-fit: contain;
+    }
+
+    /* Also make .chapter look like .page on screen */
+    .chapter {
+        width: var(--page-width);
+        min-height: var(--page-height);
+        padding: var(--page-margin);
+        margin: 0 auto 40px;
+        background: var(--paper);
+        background-image:
+            radial-gradient(circle at 15% 8%, rgba(139, 111, 63, 0.03) 0%, transparent 45%),
+            radial-gradient(circle at 85% 92%, rgba(139, 111, 63, 0.02) 0%, transparent 50%);
+        box-shadow:
+            0 1px 2px rgba(28, 26, 23, 0.06),
+            0 12px 40px rgba(28, 26, 23, 0.12);
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
     }
 }
 
@@ -504,6 +536,41 @@ img {
     margin-top: 8pt;
 }
 
+/* ---------- BOOK EPIGRAPH ---------- */
+.page-epigraph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.book-epigraph {
+    max-width: 44ch;
+    padding: 2rem 0;
+    margin: 0 auto;
+}
+
+.book-epigraph p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 15pt;
+    color: var(--soft);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    text-indent: 0;
+    text-align: center;
+}
+
+.book-epigraph footer {
+    font-family: var(--font-body);
+    font-size: 8pt;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-style: normal;
+}
+
 /* ---------- AUTHOR'S NOTE ---------- */
 .page-note {
     display: flex;
@@ -866,6 +933,22 @@ img {
     letter-spacing: 0.08em;
     text-align: center;
     text-indent: 0;
+}
+
+/* ---------- MARKDOWN-RENDERED IMAGES ---------- */
+/* Markdown-it renders images as <p><img></p> */
+.chapter-body p > img {
+    display: block;
+    margin: 24pt auto;
+    max-width: 240pt;
+    border: 0.5pt solid var(--line);
+    text-align: center;
+}
+
+.chapter-body p:has(img) {
+    text-indent: 0;
+    text-align: center;
+    margin: 24pt 0;
 }
 
 /* ---------- FOOTNOTES (superscript) ---------- */
