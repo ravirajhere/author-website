@@ -1,0 +1,73 @@
+<aside class="sidebar" id="sidebar" aria-label="Contents">
+    <div class="sidebar-head">
+        <p class="sidebar-label">Contents</p>
+        <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Close contents">✕</button>
+    </div>
+
+    <nav class="toc" id="toc" aria-label="Chapters">
+        {{toc}}
+    </nav>
+
+    <div class="sidebar-progress" aria-label="Reading progress">
+        <p class="progress-label">Reading progress</p>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text"><span id="progressPercent">0%</span></p>
+    </div>
+
+    <div class="sidebar-download">
+        <p class="sidebar-label">Download</p>
+        <div class="download-actions">
+            <a href="/assets/pdfs/a-boy-who-never-thought-en.pdf" download class="btn btn-primary">
+                English PDF
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2V9M6 9L3 6M6 9L9 6M2 10H10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="/assets/pdfs/a-boy-who-never-thought-hi.pdf" download class="btn btn-quiet">
+                Hinglish PDF
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2V9M6 9L3 6M6 9L9 6M2 10H10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-foot">
+        <p>{{author.name}} · {{year}}</p>
+    </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay" hidden aria-hidden="true"></div>
+
+<div class="book-header-actions">
+    <button type="button" class="menu-btn-menu" id="menuBtn" aria-label="Open contents" aria-expanded="false" aria-controls="sidebar">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 4H14M2 8H14M2 12H14" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+    </button>
+    <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn is-active" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" class="lang-btn" data-lang="hi" aria-pressed="false">HI</button>
+    </div>
+</div>
+
+<section class="title-page" aria-labelledby="bookTitle">
+    <p class="title-page-label">A Book by {{author.name}}</p>
+    <h1 id="bookTitle" class="title-page-heading">"{{book.title}}"</h1>
+    <p class="title-page-tagline">{{book.subtitle}} — <span class="devanagari">{{book.titleHi}}</span></p>
+    <div class="title-page-rule" aria-hidden="true"></div>
+    <p class="title-page-meta">{{book.chaptersWritten}} chapters · English &amp; Hinglish · {{book.startedYear}}–{{year}}</p>
+
+    <blockquote class="title-page-epigraph">
+        <p>"{{book.epigraph.text}}"</p>
+        <footer>— {{book.epigraph.attribution}}</footer>
+    </blockquote>
+</section>
+
+<div id="chaptersEn" lang="en" class="chapters">
+    {{chaptersEn}}
+</div>
+
+<div id="chaptersHi" lang="hi" class="chapters" hidden>
+    {{chaptersHi}}
+</div>
+
+<script src="/js/book.js" defer></script>
