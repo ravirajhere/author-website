@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
-   PDF GENERATOR
-   Uses Puppeteer to render /print.html and capture as A4 PDF
+   PDF GENERATOR — v2.0
+   Waits for body.paginated class (set by print.js)
    ═══════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const { spawn } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(ROOT, 'dist');
@@ -21,7 +22,6 @@ const LANGS = [
     { code: 'hi', out: 'a-boy-who-never-thought-hi.pdf' },
 ];
 
-/* ─── WAIT FOR SERVER ─── */
 async function waitForServer(url, timeoutMs = 20000) {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
@@ -31,37 +31,26 @@ async function waitForServer(url, timeoutMs = 20000) {
         } catch (e) {}
         await new Promise(r => setTimeout(r, 400));
     }
-    throw new Error(`Server not ready after ${timeoutMs}ms: ${url}`);
+    throw new Error(`Server not ready: ${url}`);
 }
 
-/* ─── MAIN ─── */
 async function main() {
     console.log('\n📄 Generating PDFs…\n');
 
-    if (!fs.existsSync(DIST_DIR)) {
-        throw new Error('dist/ not found. Run `npm run build` first.');
-    }
-
+    if (!fs.existsSync(DIST_DIR)) throw new Error('dist/ not found');
     const printFile = path.join(DIST_DIR, 'print.html');
-    if (!fs.existsSync(printFile)) {
-        throw new Error('dist/print.html not found. Did buildPrintPage() run?');
-    }
+    if (!fs.existsSync(printFile)) throw new Error('dist/print.html not found');
 
     fs.mkdirSync(PDFS_DIR, { recursive: true });
 
-    /* ─── Start static server ─── */
     console.log(`→ Starting server on port ${PORT}…`);
-    const { spawn } = require('child_process');
     const server = spawn(
         'npx',
         ['--yes', 'serve', '-s', 'dist', '-l', String(PORT)],
         { cwd: ROOT, stdio: 'ignore', shell: true }
     );
 
-    /* Ensure server killed on exit */
-    const cleanup = () => {
-        try { server.kill('SIGTERM'); } catch (e) {}
-    };
+    const cleanup = () => { try { server.kill('SIGTERM'); } catch (e) {} };
     process.on('exit', cleanup);
     process.on('SIGINT', () => { cleanup(); process.exit(1); });
 
@@ -69,7 +58,6 @@ async function main() {
         await waitForServer(`${BASE_URL}/print.html`);
         console.log('  ✓ Server ready\n');
 
-        /* ─── Launch browser ─── */
         const browser = await puppeteer.launch({
             headless: 'new',
             args: [
@@ -86,7 +74,6 @@ async function main() {
 
             const page = await browser.newPage();
 
-            /* Capture browser console for debugging */
             page.on('console', msg => {
                 const type = msg.type();
                 if (type === 'error' || type === 'warning') {
@@ -98,22 +85,21 @@ async function main() {
             });
 
             try {
-                await page.goto(url, {
-                    waitUntil: 'networkidle0',
-                    timeout: 60000,
-                });
+                await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-                /* Wait for book-root to reveal */
-                await page.waitForFunction(
-                    () => {
-                        const r = document.getElementById('book-root');
-                        return r && !r.hidden;
-                    },
-                    { timeout: 25000, polling: 200 }
-                );
+                /* Wait for pagination to complete */
+                try {
+                    await page.waitForFunction(
+                        () => document.body.classList.contains('paginated'),
+                        { timeout: 20000, polling: 300 }
+                    );
+                    console.log('  ✓ Pagination complete');
+                } catch (e) {
+                    console.log('  ⚠ Pagination timeout — printing anyway');
+                }
 
-                /* Small buffer for fonts/layout */
-                await new Promise(r => setTimeout(r, 1000));
+                /* Buffer for fonts */
+                await new Promise(r => setTimeout(r, 1500));
 
                 const out = path.join(PDFS_DIR, lang.out);
                 await page.pdf({
@@ -127,11 +113,10 @@ async function main() {
                 const size = (fs.statSync(out).size / 1024 / 1024).toFixed(2);
                 console.log(`  ✓ ${lang.out} (${size} MB)\n`);
             } catch (err) {
-                /* Capture screenshot for debugging */
-                const shotPath = path.join(PDFS_DIR, `_debug-${lang.code}.png`);
+                const shot = path.join(PDFS_DIR, `_debug-${lang.code}.png`);
                 try {
-                    await page.screenshot({ path: shotPath, fullPage: true });
-                    console.log(`  ⚠ Screenshot saved: ${shotPath}`);
+                    await page.screenshot({ path: shot, fullPage: true });
+                    console.log(`  ⚠ Screenshot: ${shot}`);
                 } catch (e) {}
                 throw err;
             } finally {
