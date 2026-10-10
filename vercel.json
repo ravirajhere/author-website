@@ -5,6 +5,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": null,
+  "nodeVersion": "20.x",
 
   "git": {
     "deploymentEnabled": {
@@ -57,12 +58,5 @@
     { "source": "/now",      "destination": "/now.html" },
     { "source": "/about",    "destination": "/about.html" },
     { "source": "/print",    "destination": "/print.html" }
-  ],
-
-  "functions": {
-    "api/subscribe.js": {
-      "maxDuration": 10,
-      "memory": 512
-    }
-  }
+  ]
 }
