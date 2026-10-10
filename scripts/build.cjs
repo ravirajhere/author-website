@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
-   THE UNFINISHED STORY — BUILD ENGINE v2.1
-   Renders: index · book · journal · now · about
+   THE UNFINISHED STORY — BUILD ENGINE v2.2
+   Renders: index · book · journal · now · about · print
    ═══════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -18,6 +18,7 @@ const PARTIALS_DIR  = path.join(TEMPLATES_DIR, 'partials');
 const DIST_DIR      = path.join(ROOT, 'dist');
 const STATIC_DIRS   = ['css', 'js', 'images', 'assets'];
 
+/* ─── MARKDOWN ─── */
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true })
     .use(markdownItFootnote);
 
@@ -38,6 +39,7 @@ md.renderer.rules.footnote_anchor = (tokens, idx) => {
     return ` <a href="#fnref-${id}" class="chapter-notes-back">↩</a>`;
 };
 
+/* ─── HELPERS ─── */
 const readJSON = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 const readFile = f => fs.readFileSync(f, 'utf8');
 const exists = f => fs.existsSync(f);
@@ -72,7 +74,7 @@ function renderConditional(template, flags) {
     return template.replace(/\{\{#(\w+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (_, k, body) => flags[k] ? body : '');
 }
 
-/* ─── LOAD ─── */
+/* ─── LOAD DATA ─── */
 const config = readJSON(path.join(DATA_DIR, 'config.json'));
 const chaptersData = readJSON(path.join(DATA_DIR, 'chapters.json'));
 const journalData = readJSON(path.join(DATA_DIR, 'journal.json'));
@@ -86,6 +88,7 @@ const BOOK_TMPL = readFile(path.join(TEMPLATES_DIR, 'book.html'));
 const JOURNAL_TMPL = readFile(path.join(TEMPLATES_DIR, 'journal.html'));
 const NOW_TMPL = readFile(path.join(TEMPLATES_DIR, 'now.html'));
 const ABOUT_TMPL = readFile(path.join(TEMPLATES_DIR, 'about.html'));
+const PRINT_TMPL = readFile(path.join(TEMPLATES_DIR, 'print.html'));
 
 const YEAR = new Date().getFullYear();
 const TOTAL_CHAPTERS = config.book.chaptersPlanned;
@@ -269,7 +272,7 @@ function buildBookPage() {
 function buildHomePage() {
     const visible = chaptersData.chapters.filter(c => c.status === 'published' || c.status === 'draft');
     const chapterCount = visible.length;
-    const randomQuote = quotesData.quotes[Math.floor(Math.random() * quotesData.quotes.length)];
+    const randomQuote = quotesData.quotes[0];
 
     const schema = JSON.stringify({
         '@context': 'https://schema.org',
@@ -437,6 +440,43 @@ function buildAboutPage() {
     console.log('  ✓ /about');
 }
 
+/* ─── BUILD PRINT (PDF route) ─── */
+function buildPrintPage() {
+    const visible = chaptersData.chapters.filter(
+        c => c.status === 'published' || c.status === 'draft'
+    );
+
+    const chapters = visible.map(c => {
+        const content = loadChapterContent(c.number, 'en');
+        if (!content) return '';
+        const bodyHtml = md.render(content);
+        return `
+<article class="chapter" id="chapter-${c.number}">
+    <header class="chapter-head">
+        <p class="chapter-num">Chapter ${c.number}</p>
+        <h2 class="chapter-title">${escapeHtml(c.title)}</h2>
+        <p class="chapter-year">${escapeHtml(c.year)}</p>
+    </header>
+    <div class="chapter-body">
+        ${bodyHtml}
+    </div>
+</article>`;
+    }).join('\n');
+
+    const dedicationLines = (config.book.dedication || [])
+        .map(l => `<p class="dedication-line">${escapeHtml(l)}</p>`)
+        .join('');
+
+    const html = render(PRINT_TMPL, {
+        ...SHARED,
+        chapters,
+        dedicationLines,
+    });
+
+    writeFile(path.join(DIST_DIR, 'print.html'), html);
+    console.log('  ✓ /print');
+}
+
 /* ─── MAIN BUILD ─── */
 function build() {
     console.log('\n📖 Building: The Unfinished Story\n');
@@ -467,6 +507,16 @@ function build() {
     buildJournalPage();
     buildNowPage();
     buildAboutPage();
+    buildPrintPage();
+
+    /* Sitemap */
+    console.log('\n→ Generating sitemap…');
+    try {
+        const { execSync } = require('child_process');
+        execSync('node scripts/generate-sitemap.cjs', { stdio: 'inherit' });
+    } catch (e) {
+        console.log('  ⚠ Sitemap skipped:', e.message);
+    }
 
     console.log('\n✓ Build complete.\n');
     console.log(`  Output: ${DIST_DIR}\n`);
