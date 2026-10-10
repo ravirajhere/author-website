@@ -1,58 +1,44 @@
 name: Generate Book PDFs
 
 on:
-  workflow_dispatch:
-
   push:
     branches: [main]
     paths:
-      - 'book.html'
-      - 'print.html'
+      - 'content/chapters/**'
+      - 'data/chapters.json'
+      - 'data/config.json'
+      - 'templates/print.html'
       - 'css/print.css'
       - 'js/print.js'
-      - 'assets/images/**'
+      - 'scripts/generate-pdf.cjs'
+  workflow_dispatch:
 
 jobs:
-  generate:
+  pdf:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --include=dev --no-audit --no-fund
+        run: npm ci
 
-      - name: Start local HTTP server
-        run: |
-          python3 -m http.server 8080 &
-          sleep 2
-          curl -s -I http://localhost:8080/print.html | head -1
+      - name: Build site
+        run: npm run build
 
       - name: Generate PDFs
         run: npm run generate-pdf
-        env:
-          PRINT_URL: http://localhost:8080
 
-      - name: Commit PDFs back to repo
+      - name: Commit PDFs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/pdfs/
-          git diff --staged --quiet || git commit -m "chore: auto-generate book PDFs [skip ci]"
+          git diff --staged --quiet || git commit -m "chore: regenerate book PDFs [skip ci]"
           git push
-
-      - name: Upload PDFs as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: book-pdfs
-          path: assets/pdfs/*.pdf
-          retention-days: 90
