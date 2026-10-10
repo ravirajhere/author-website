@@ -1,0 +1,41 @@
+<footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+        <div class="footer-col footer-brand-col">
+            <p class="footer-brand">{{author.name}}</p>
+            <p class="footer-tag">{{book.title}} — {{book.status}}, since {{book.startedYear}}.</p>
+        </div>
+
+        <div class="footer-col">
+            <p class="footer-label">Read</p>
+            <ul>
+                <li><a href="/book">The Book</a></li>
+                <li><a href="/journal">Journal</a></li>
+                <li><a href="/now">Now</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <p class="footer-label">Elsewhere</p>
+            <ul>
+                <li><a href="{{author.email}}" rel="noopener">Email</a></li>
+                <li><a href="{{social.github}}" rel="noopener" target="_blank">GitHub</a></li>
+                <li><a href="{{social.linkedin}}" rel="noopener" target="_blank">LinkedIn</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <p class="footer-label">Details</p>
+            <ul>
+                <li>{{author.location}}</li>
+                <li>&copy; {{year}}</li>
+                <li class="footer-note">Written by hand.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; {{year}} {{author.name}}. All rights reserved.</p>
+        <p class="footer-note">Some names have been changed to protect privacy.</p>
+    </div>
+</footer>
