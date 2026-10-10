@@ -1,0 +1,280 @@
+{
+  "eras": [
+    {
+      "id": "childhood",
+      "label": "Childhood",
+      "years": "2008–2012",
+      "order": 1
+    },
+    {
+      "id": "school",
+      "label": "School Years",
+      "years": "2013–2019",
+      "order": 2
+    },
+    {
+      "id": "searching",
+      "label": "Searching",
+      "years": "2020–2023",
+      "order": 3
+    },
+    {
+      "id": "becoming",
+      "label": "Becoming",
+      "years": "2024–2026",
+      "order": 4
+    }
+  ],
+
+  "chapters": [
+    {
+      "number": 1,
+      "slug": "the-beginning",
+      "title": "The Beginning",
+      "titleHi": "Shuruaat",
+      "year": "2008",
+      "era": "childhood",
+      "status": "published",
+      "readingTimeEn": 4,
+      "readingTimeHi": 3,
+      "epigraph": {
+        "text": "The child is father of the man.",
+        "attribution": "William Wordsworth"
+      }
+    },
+    {
+      "number": 2,
+      "slug": "a-loss",
+      "title": "A Loss",
+      "titleHi": "Ek Kami",
+      "year": "2009",
+      "era": "childhood",
+      "status": "published",
+      "readingTimeEn": 3,
+      "readingTimeHi": 3,
+      "epigraph": {
+        "text": "Death is not the greatest loss in life. The greatest loss is what dies inside us while we live.",
+        "attribution": "Norman Cousins"
+      }
+    },
+    {
+      "number": 3,
+      "slug": "a-changing-home",
+      "title": "A Changing Home",
+      "titleHi": "Badalta Ghar",
+      "year": "2010–2012",
+      "era": "childhood",
+      "status": "published",
+      "readingTimeEn": 3,
+      "readingTimeHi": 2,
+      "epigraph": {
+        "text": "Home is where one starts from.",
+        "attribution": "T.S. Eliot"
+      }
+    },
+    {
+      "number": 4,
+      "slug": "first-steps-into-school",
+      "title": "First Steps into School",
+      "titleHi": "School Ke Pehle Kadam",
+      "year": "2013",
+      "era": "childhood",
+      "status": "published",
+      "readingTimeEn": 2,
+      "readingTimeHi": 2,
+      "epigraph": {
+        "text": "Education is the most powerful weapon which you can use to change the world.",
+        "attribution": "Nelson Mandela"
+      }
+    },
+    {
+      "number": 5,
+      "slug": "a-house-divided",
+      "title": "A House Divided",
+      "titleHi": "Ghar Ka Batwara",
+      "year": "2014–2016",
+      "era": "childhood",
+      "status": "published",
+      "readingTimeEn": 2,
+      "readingTimeHi": 3,
+      "epigraph": {
+        "text": "A house divided against itself cannot stand.",
+        "attribution": "Abraham Lincoln"
+      }
+    },
+    {
+      "number": 6,
+      "slug": "an-unexpected-leap",
+      "title": "An Unexpected Leap",
+      "titleHi": "Ek Anokha Kadam",
+      "year": "2017",
+      "era": "school",
+      "status": "published",
+      "readingTimeEn": 2,
+      "readingTimeHi": 3,
+      "epigraph": {
+        "text": "Life shrinks or expands in proportion to one's courage.",
+        "attribution": "Anaïs Nin"
+      }
+    },
+    {
+      "number": 7,
+      "slug": "earning-a-name",
+      "title": "Earning a Name",
+      "titleHi": "Ek Nayi Pehchaan",
+      "year": "2017",
+      "era": "school",
+      "status": "published",
+      "readingTimeEn": 2,
+      "readingTimeHi": 3,
+      "epigraph": {
+        "text": "Respect is earned, honesty is appreciated, trust is gained, loyalty is returned.",
+        "attribution": "Anonymous"
+      }
+    },
+    {
+      "number": 8,
+      "slug": "the-will-to-rise",
+      "title": "The Will to Rise",
+      "titleHi": "Uthne Ki Chah",
+      "year": "2018",
+      "era": "school",
+      "status": "published",
+      "readingTimeEn": 3,
+      "readingTimeHi": 4,
+      "epigraph": {
+        "text": "It always seems impossible until it is done.",
+        "attribution": "Nelson Mandela"
+      }
+    },
+    {
+      "number": 9,
+      "slug": "a-dream-takes-shape",
+      "title": "A Dream Takes Shape",
+      "titleHi": "Sapna Sakar Hota Hai",
+      "year": "2018–2019",
+      "era": "school",
+      "status": "published",
+      "readingTimeEn": 4,
+      "readingTimeHi": 4,
+      "epigraph": {
+        "text": "The future belongs to those who believe in the beauty of their dreams.",
+        "attribution": "Eleanor Roosevelt"
+      }
+    },
+    {
+      "number": 10,
+      "slug": "a-tribute-and-a-farewell",
+      "title": "A Tribute and a Farewell",
+      "titleHi": "Ek Shraddhanjali aur Alvida",
+      "year": "2019",
+      "era": "school",
+      "status": "published",
+      "readingTimeEn": 5,
+      "readingTimeHi": 5,
+      "epigraph": {
+        "text": "We do not remember days, we remember moments.",
+        "attribution": "Cesare Pavese"
+      }
+    },
+    {
+      "number": 11,
+      "slug": "process-of-shifting",
+      "title": "Process of Shifting",
+      "titleHi": "Process of Shifting",
+      "year": "2019",
+      "era": "school",
+      "status": "draft",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": {
+        "text": "Every new beginning comes from some other beginning's end.",
+        "attribution": "Seneca"
+      }
+    },
+    {
+      "number": 12,
+      "slug": "the-locked-year",
+      "title": "The Locked Year",
+      "titleHi": "Saal Bandh",
+      "year": "2020",
+      "era": "searching",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 13,
+      "slug": "online-classrooms",
+      "title": "Online Classrooms",
+      "titleHi": "Screen Pe School",
+      "year": "2021",
+      "era": "searching",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 14,
+      "slug": "back-to-school",
+      "title": "Back to School",
+      "titleHi": "Wapas School",
+      "year": "2022",
+      "era": "searching",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 15,
+      "slug": "doors-opening",
+      "title": "Doors Opening",
+      "titleHi": "Khulti Darwaze",
+      "year": "2023",
+      "era": "searching",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 16,
+      "slug": "writing-begins",
+      "title": "Writing Begins",
+      "titleHi": "Likhna Shuru Hua",
+      "year": "2024",
+      "era": "becoming",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 17,
+      "slug": "a-story-takes-shape",
+      "title": "A Story Takes Shape",
+      "titleHi": "Ek Kahani Banti Hai",
+      "year": "2025",
+      "era": "becoming",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    },
+    {
+      "number": 18,
+      "slug": "the-unfinished-story",
+      "title": "The Unfinished Story",
+      "titleHi": "Adhoori Kahani",
+      "year": "2026",
+      "era": "becoming",
+      "status": "planned",
+      "readingTimeEn": null,
+      "readingTimeHi": null,
+      "epigraph": null
+    }
+  ]
+}
