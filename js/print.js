@@ -1,53 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════════
-   THE UNFINISHED STORY — PRINT SCRIPT v6.1
-   Chapters pre-rendered at build time. Only pagination here.
-   v6.1: Always reveal book-root, even on error
+   THE UNFINISHED STORY — PRINT SCRIPT v6.2
+   Only pagination. No reveal logic. Content is visible from HTML.
    ═══════════════════════════════════════════════════════════════════ */
 
 (function () {
     'use strict';
 
-    console.log('[print] v6.1 starting');
+    console.warn('[print] v6.2 starting');
 
-    const FIRST_CHAPTER_PAGE = 10;
-    const PAGE_WIDTH_MM = 210;
-    const PAGE_MARGIN_MM = 20;
-    const MM_TO_PX = 3.7795;
-    const CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);
-    const USABLE_CONTENT_PX = Math.round(180 * MM_TO_PX);
+    var FIRST_CHAPTER_PAGE = 10;
+    var PAGE_WIDTH_MM = 210;
+    var PAGE_MARGIN_MM = 20;
+    var MM_TO_PX = 3.7795;
+    var CONTENT_WIDTH_MM = PAGE_WIDTH_MM - (PAGE_MARGIN_MM * 2);
+    var USABLE_CONTENT_PX = Math.round(180 * MM_TO_PX);
 
-    /* ─── FORCE REVEAL (always works) ─── */
-    function forceReveal() {
-        const loading = document.getElementById('loading');
-        const root = document.getElementById('book-root');
-        if (loading) {
-            loading.hidden = true;
-            loading.style.display = 'none';
-        }
-        if (root) {
-            root.hidden = false;
-            root.style.display = '';
-            root.classList.add('ready');
-        }
-        document.body.classList.add('print-ready');
-    }
-
-    /* ─── ESCAPE HTML ─── */
     function escapeHtml(str) {
         return String(str)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;')
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    /* ─── FOOTNOTES ─── */
     function processFootnotes(bodyEl) {
-        const clone = bodyEl.cloneNode(true);
-        const footnotes = Array.from(clone.querySelectorAll('.footnote'));
-        const notes = [];
+        var clone = bodyEl.cloneNode(true);
+        var footnotes = Array.prototype.slice.call(clone.querySelectorAll('.footnote'));
+        var notes = [];
 
-        footnotes.forEach(fn => {
-            const text = fn.getAttribute('data-note') || '';
-            const original = fn.textContent.trim();
+        footnotes.forEach(function (fn) {
+            var text = fn.getAttribute('data-note') || '';
+            var original = fn.textContent.trim();
 
             if (!text) {
                 if (fn.parentNode) {
@@ -56,12 +37,12 @@
                 return;
             }
 
-            const num = notes.length + 1;
-            const marker = document.createElement('sup');
+            var num = notes.length + 1;
+            var marker = document.createElement('sup');
             marker.className = 'footnote-marker';
             marker.textContent = num;
 
-            const textNode = document.createTextNode(original);
+            var textNode = document.createTextNode(original);
             if (fn.parentNode) {
                 fn.parentNode.replaceChild(textNode, fn);
                 if (textNode.parentNode) {
@@ -69,28 +50,27 @@
                 }
             }
 
-            notes.push({ num, text });
+            notes.push({ num: num, text: text });
         });
 
-        return { cleanBody: clone, notes };
+        return { cleanBody: clone, notes: notes };
     }
 
-    /* ─── NOTES ─── */
     function buildNotes(notes) {
         if (!notes.length) return null;
-        const section = document.createElement('section');
+        var section = document.createElement('section');
         section.className = 'chapter-notes';
         section.innerHTML = '<p class="chapter-notes-heading">Notes</p>';
 
-        const ol = document.createElement('ol');
+        var ol = document.createElement('ol');
         ol.className = 'chapter-notes-list';
 
-        notes.forEach(n => {
-            const li = document.createElement('li');
-            const numSpan = document.createElement('span');
+        notes.forEach(function (n) {
+            var li = document.createElement('li');
+            var numSpan = document.createElement('span');
             numSpan.className = 'chapter-notes-num';
             numSpan.textContent = n.num;
-            const textSpan = document.createElement('span');
+            var textSpan = document.createElement('span');
             textSpan.className = 'chapter-notes-text';
             textSpan.textContent = n.text;
             li.appendChild(numSpan);
@@ -102,14 +82,15 @@
         return section;
     }
 
-    /* ─── MEASURE ─── */
     function measureBlocks(blocks) {
-        const measure = document.createElement('div');
-        measure.style.cssText = `position:absolute;left:-99999px;top:0;width:${CONTENT_WIDTH_MM}mm;font-family:'Lora',Georgia,serif;font-size:11pt;line-height:1.75;padding:0;margin:0;box-sizing:border-box;`;
+        var measure = document.createElement('div');
+        measure.style.cssText = 'position:absolute;left:-99999px;top:0;width:' +
+            CONTENT_WIDTH_MM +
+            'mm;font-family:Lora,Georgia,serif;font-size:11pt;line-height:1.75;padding:0;margin:0;box-sizing:border-box;';
         document.body.appendChild(measure);
 
-        const result = blocks.map(b => {
-            const clone = b.cloneNode(true);
+        var result = blocks.map(function (b) {
+            var clone = b.cloneNode(true);
             measure.innerHTML = '';
             measure.appendChild(clone);
             return { node: b, heightPx: clone.offsetHeight };
@@ -119,13 +100,13 @@
         return result;
     }
 
-    /* ─── PAGINATE ─── */
     function paginate(measured) {
-        const chunks = [];
-        let current = [];
-        let height = 0;
+        var chunks = [];
+        var current = [];
+        var height = 0;
 
-        for (const item of measured) {
+        for (var i = 0; i < measured.length; i++) {
+            var item = measured[i];
             if (item.heightPx > USABLE_CONTENT_PX) {
                 if (current.length) { chunks.push(current); current = []; height = 0; }
                 chunks.push([item.node]);
@@ -144,49 +125,52 @@
         return chunks;
     }
 
-    /* ─── BUILD CHAPTER PAGES ─── */
     function buildChapterPages(original, index, startPage) {
-        const numEl = original.querySelector('.chapter-num');
-        const titleEl = original.querySelector('.chapter-title');
-        const yearEl = original.querySelector('.chapter-year');
-        const bodyEl = original.querySelector('.chapter-body');
+        var numEl = original.querySelector('.chapter-num');
+        var titleEl = original.querySelector('.chapter-title');
+        var yearEl = original.querySelector('.chapter-year');
+        var bodyEl = original.querySelector('.chapter-body');
 
-        const numText = numEl ? numEl.textContent.trim() : ('Chapter ' + (index + 1));
-        const titleText = titleEl ? titleEl.textContent.trim() : '';
-        const yearText = yearEl ? yearEl.textContent.trim() : '';
+        var numText = numEl ? numEl.textContent.trim() : ('Chapter ' + (index + 1));
+        var titleText = titleEl ? titleEl.textContent.trim() : '';
+        var yearText = yearEl ? yearEl.textContent.trim() : '';
 
         if (!bodyEl) return [];
 
-        const { cleanBody, notes } = processFootnotes(bodyEl);
-        const blocks = Array.from(cleanBody.children);
-        const measured = measureBlocks(blocks);
+        var processed = processFootnotes(bodyEl);
+        var cleanBody = processed.cleanBody;
+        var notes = processed.notes;
 
-        const notesSection = buildNotes(notes);
+        var blocks = Array.prototype.slice.call(cleanBody.children);
+        var measured = measureBlocks(blocks);
+
+        var notesSection = buildNotes(notes);
         if (notesSection) {
-            const m = document.createElement('div');
-            m.style.cssText = `position:absolute;left:-99999px;top:0;width:${CONTENT_WIDTH_MM}mm;font-family:'Lora',Georgia,serif;font-size:11pt;line-height:1.75;`;
+            var m = document.createElement('div');
+            m.style.cssText = 'position:absolute;left:-99999px;top:0;width:' +
+                CONTENT_WIDTH_MM + 'mm;font-family:Lora,Georgia,serif;font-size:11pt;line-height:1.75;';
             document.body.appendChild(m);
             m.appendChild(notesSection.cloneNode(true));
             measured.push({ node: notesSection, heightPx: m.firstChild.offsetHeight });
             document.body.removeChild(m);
         }
 
-        const pages = paginate(measured);
-        const result = [];
+        var pages = paginate(measured);
+        var result = [];
 
-        pages.forEach((chunk, p) => {
-            const isFirst = p === 0;
-            const page = document.createElement('section');
+        for (var p = 0; p < pages.length; p++) {
+            var isFirst = p === 0;
+            var page = document.createElement('section');
             page.className = 'chapter';
             page.id = 'pdf-chapter-' + (index + 1) + (isFirst ? '' : '-p' + (startPage + p));
 
-            const runningHeader = document.createElement('div');
+            var runningHeader = document.createElement('div');
             runningHeader.className = 'chapter-running-header';
             runningHeader.innerHTML = '<span>' + escapeHtml(titleText) + '</span><span>' + escapeHtml(yearText) + '</span>';
             page.appendChild(runningHeader);
 
             if (isFirst) {
-                const head = document.createElement('div');
+                var head = document.createElement('div');
                 head.className = 'chapter-header';
                 head.innerHTML =
                     '<p class="chapter-number">' + escapeHtml(numText) + '</p>' +
@@ -196,96 +180,96 @@
                 page.appendChild(head);
             }
 
-            const body = document.createElement('div');
+            var body = document.createElement('div');
             body.className = isFirst ? 'chapter-body' : 'chapter-body chapter-body-continued';
-            chunk.forEach(b => body.appendChild(b.cloneNode(true)));
+            pages[p].forEach(function (b) {
+                body.appendChild(b.cloneNode(true));
+            });
             page.appendChild(body);
 
-            const pn = document.createElement('div');
+            var pn = document.createElement('div');
             pn.className = 'chapter-page-number';
             pn.textContent = String(startPage + p);
             page.appendChild(pn);
 
             result.push(page);
-        });
+        }
 
         return result;
     }
 
-    /* ─── TOC ─── */
     function buildToc(chapters, startPages) {
-        const list = document.getElementById('toc-list');
+        var list = document.getElementById('toc-list');
         if (!list) return;
         list.innerHTML = '';
-        chapters.forEach((ch, i) => {
-            const title = ch.querySelector('.chapter-title') ? ch.querySelector('.chapter-title').textContent.trim() : ('Chapter ' + (i + 1));
-            const year = ch.querySelector('.chapter-year') ? ch.querySelector('.chapter-year').textContent.trim() : '';
-            const li = document.createElement('li');
+
+        for (var i = 0; i < chapters.length; i++) {
+            var title = chapters[i].querySelector('.chapter-title');
+            var year = chapters[i].querySelector('.chapter-year');
+            var titleText = title ? title.textContent.trim() : ('Chapter ' + (i + 1));
+            var yearText = year ? year.textContent.trim() : '';
+
+            var li = document.createElement('li');
             li.innerHTML =
                 '<span class="toc-num">Chapter ' + (i + 1) + '</span>' +
-                '<span class="toc-title">' + escapeHtml(title) + '</span>' +
-                (year ? '<span class="toc-year">' + escapeHtml(year) + '</span>' : '') +
+                '<span class="toc-title">' + escapeHtml(titleText) + '</span>' +
+                (yearText ? '<span class="toc-year">' + escapeHtml(yearText) + '</span>' : '') +
                 '<span class="toc-page-num">' + startPages[i] + '</span>';
             list.appendChild(li);
-        });
-    }
-
-    /* ─── MAIN ─── */
-    function run() {
-        try {
-            const container = document.getElementById('book-content');
-            if (!container) {
-                console.warn('[print] #book-content missing — revealing anyway');
-                forceReveal();
-                return;
-            }
-
-            const chapters = Array.from(container.querySelectorAll('article.chapter'));
-            console.log('[print] found', chapters.length, 'chapters');
-
-            if (chapters.length === 0) {
-                console.warn('[print] no chapters found — revealing anyway');
-                forceReveal();
-                return;
-            }
-
-            /* Remove originals */
-            chapters.forEach(c => c.remove());
-
-            const startPages = {};
-            let currentPage = FIRST_CHAPTER_PAGE;
-
-            chapters.forEach((ch, i) => {
-                startPages[i] = currentPage;
-                const pages = buildChapterPages(ch, i, currentPage);
-                pages.forEach(p => container.appendChild(p));
-                currentPage += pages.length;
-            });
-
-            buildToc(chapters, startPages);
-
-            console.log('[print] pagination complete, revealing');
-            setTimeout(forceReveal, 300);
-        } catch (err) {
-            console.error('[print] error:', err);
-            forceReveal();
         }
     }
 
-    /* ─── INIT ─── */
+    function run() {
+        try {
+            var container = document.getElementById('book-content');
+            if (!container) {
+                console.warn('[print] #book-content missing');
+                document.body.classList.add('paginated');
+                return;
+            }
+
+            var chapters = Array.prototype.slice.call(container.querySelectorAll('article.chapter'));
+            console.warn('[print] found ' + chapters.length + ' chapters');
+
+            if (chapters.length === 0) {
+                document.body.classList.add('paginated');
+                return;
+            }
+
+            chapters.forEach(function (c) { c.remove(); });
+
+            var startPages = {};
+            var currentPage = FIRST_CHAPTER_PAGE;
+
+            for (var i = 0; i < chapters.length; i++) {
+                startPages[i] = currentPage;
+                var pages = buildChapterPages(chapters[i], i, currentPage);
+                pages.forEach(function (p) { container.appendChild(p); });
+                currentPage += pages.length;
+            }
+
+            buildToc(chapters, startPages);
+
+            console.warn('[print] pagination complete');
+            document.body.classList.add('paginated');
+        } catch (err) {
+            console.error('[print] error:', err.message);
+            document.body.classList.add('paginated');
+        }
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', run);
     } else {
         run();
     }
 
-    /* Safety net */
+    /* Safety: mark paginated no matter what after 6s */
     setTimeout(function () {
-        const root = document.getElementById('book-root');
-        if (root && root.hidden) {
-            console.warn('[print] safety timeout — forcing reveal');
-            forceReveal();
+        if (!document.body.classList.contains('paginated')) {
+            console.warn('[print] safety timeout — marking paginated');
+            document.body.classList.add('paginated');
         }
-    }, 10000);
+    }, 6000);
 
 })();
